@@ -79,7 +79,7 @@ struct MainView: View {
             VStack(alignment: .leading, spacing: 22) {
                 HStack(spacing: 10) { GuardianLogo(); VStack(alignment: .leading) { Text("MacGuardian").font(.headline); Text("ESPACIO PARA LO IMPORTANTE").font(.system(size: 8, weight: .semibold)).tracking(1).foregroundStyle(.secondary) } }.padding(.horizontal, 12).padding(.top, 22)
                 List(Section.allCases, id: \.self, selection: $section) { item in Label(item.rawValue, systemImage: item.symbol).padding(.vertical, 4).tag(item) }.listStyle(.sidebar)
-                VStack(alignment: .leading, spacing: 7) { Label("Local y privado", systemImage: "lock.shield").foregroundStyle(Color.mint); Text("Sin cuentas · Sin telemetría").font(.caption).foregroundStyle(.secondary); Text("v0.1.0 · Edición personal").font(.caption2).foregroundStyle(.tertiary) }.padding(18)
+                VStack(alignment: .leading, spacing: 7) { Label("Local y privado", systemImage: "lock.shield").foregroundStyle(Color.mint); Text("Sin cuentas · Sin telemetría").font(.caption).foregroundStyle(.secondary); Text("v0.2.0 · Edición personal").font(.caption2).foregroundStyle(.tertiary) }.padding(18)
             }.frame(width: 235)
             Divider()
             VStack(alignment: .leading, spacing: 0) {
@@ -88,7 +88,7 @@ struct MainView: View {
                     Spacer()
                     if m.busy { Button("Cancelar", role: .cancel) { m.cancel() } } else { Button { m.chooseFolder() } label: { Label("Analizar carpeta", systemImage: "plus.magnifyingglass") }.buttonStyle(.borderedProminent).tint(.teal) }
                 }.padding(28)
-                if m.busy { VStack(alignment: .leading, spacing: 6) { if m.hashTotal > 0 { ProgressView(value: Double(m.hashDone), total: Double(m.hashTotal)) } else { ProgressView().controlSize(.small) }; Text(m.hashTotal > 0 ? "\(m.hashDone) de \(m.hashTotal) candidatos comparados" : "\(m.processed) entradas visitadas · El total se conoce al terminar").font(.caption).foregroundStyle(.secondary) }.padding(.horizontal, 28).padding(.bottom, 12) }
+                if m.busy { VStack(alignment: .leading, spacing: 6) { if m.hashTotal > 0 { ProgressView(value: Double(m.hashDone), total: Double(m.hashTotal)) } else { ProgressView().controlSize(.small) }; Text(m.hashTotal > 0 ? "\(m.hashDone) de \(m.hashTotal) \(m.progressKind)" : "\(m.processed) entradas visitadas · El total se conoce al terminar").font(.caption).foregroundStyle(.secondary) }.padding(.horizontal, 28).padding(.bottom, 12) }
                 Divider()
                 content.padding(24).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 Divider()
@@ -97,18 +97,20 @@ struct MainView: View {
         }.tint(.mint)
         .alert("MacGuardian", isPresented: Binding(get: { m.error != nil }, set: { if !$0 { m.error = nil } })) { Button("Entendido") { m.error = nil } } message: { Text(m.error ?? "") }
         .sheet(isPresented: $review) { ReviewSheet().environmentObject(m) }
+        .sheet(item: $m.quickPlan) { QuickCleanSheet(plan: $0).environmentObject(m) }
+        .sheet(item: $m.cleanupSummary) { CleanupSummarySheet(report: $0) }
         .onChange(of: section) { _, _ in search = "" }
     }
     @ViewBuilder var content: some View {
         switch section {
         case .home: HomeView()
         case .storage: StorageView(review: $review)
-        case .clean: FileBrowser(title: "Archivos que requieren revisión", files: m.scan?.candidates ?? [], review: $review, note: "Nada está seleccionado por defecto. Las cachés pueden estar activas. Cierra la aplicación responsable antes de revisarlas.")
+        case .clean: FileBrowser(title: "Archivos que requieren revisión", scope: .clean, review: $review, note: "Nada está seleccionado por defecto. Las cachés pueden estar activas. Cierra la aplicación responsable antes de revisarlas.")
         case .apps: ApplicationsView()
         case .processes: ProcessesView()
         case .startup: StartupView()
         case .duplicates: DuplicatesView(review: $review)
-        case .development: FileBrowser(title: "Entornos y archivos de desarrollo", files: m.scan?.files.filter { $0.category == "Desarrollo" } ?? [], review: $review, note: "Las dependencias, entornos virtuales, Docker y simuladores están protegidos. No se ejecutan purgas de herramientas ni desinstalaciones ocultas.")
+        case .development: FileBrowser(title: "Entornos y archivos de desarrollo", scope: .development, review: $review, note: "Las dependencias, entornos virtuales, Docker y simuladores están protegidos. No se ejecutan purgas de herramientas ni desinstalaciones ocultas.")
         case .diagnostics: DiagnosticsView()
         case .history: HistoryView()
         case .settings: SettingsView()
@@ -135,6 +137,11 @@ struct HomeView: View {
                         Spacer()
                     }.padding(.vertical, 12)
                 }
+                Card {
+                    HStack { Label("Limpieza rápida recomendada", systemImage: "sparkles").font(.headline); Spacer(); Button("Preparar limpieza rápida") { m.prepareQuickCleanup() }.buttonStyle(.borderedProminent).tint(.teal).disabled(m.busy) }
+                    Text("Analiza cachés regenerables e informes de fallos antiguos y elige por ti los archivos antiguos compatibles. Una sola autorización; sin seleccionar uno por uno. No borra documentos ni cambia servicios.").foregroundStyle(.secondary)
+                    Text("Mueve a Papelera y muestra el resultado y la variación real del espacio disponible. No vacía la Papelera ni promete acelerar macOS.").font(.caption).foregroundStyle(.secondary)
+                }
                 HStack(spacing: 16) { MetricCard(label: "Almacenamiento disponible", value: sizeText(m.metrics.available), symbol: "internaldrive", detail: "De \(sizeText(m.metrics.capacity)) · volumen de usuario"); MetricCard(label: "CPU ocupada", value: m.metrics.cpuBusy.map { String(format: "%.1f %%", $0) } ?? "Midiendo…", symbol: "cpu", detail: "Diferencia de ticks entre muestras"); MetricCard(label: "Memoria", value: sizeText(m.metrics.usedMemory), symbol: "memorychip", detail: "Activa + cableada + comprimida") }
                 Card {
                     HStack { Text("Tu equipo").font(.headline); Spacer(); Text(m.metrics.model).foregroundStyle(.secondary) }
@@ -142,37 +149,76 @@ struct HomeView: View {
                     Divider()
                     HStack { Label("\(m.processes.count) procesos", systemImage: "waveform.path.ecg"); Spacer(); Label("\(m.apps.count) aplicaciones", systemImage: "app"); Spacer(); Label("\(m.startup.count) servicios en plist", systemImage: "power") }.font(.callout)
                 }
-                if let scan = m.scan { Card { Text("Último análisis").font(.headline); Text(scan.root).textSelection(.enabled); Text("\(scan.files.count) archivos · \(sizeText(scan.logical)) lógicos · \(scan.candidates.count) candidatos para revisar"); Text("Los candidatos no equivalen a espacio recuperable garantizado. Mover a Papelera no libera espacio hasta vaciarla desde Finder.").font(.caption).foregroundStyle(.secondary) } }
+                if let scan = m.scan { Card { Text("Último análisis").font(.headline); Text(scan.root).textSelection(.enabled); Text("\(scan.files.count) archivos · \(sizeText(m.scanIndex.logical)) lógicos · \(m.scanIndex.candidateCount) candidatos para revisar"); Text("Los candidatos no equivalen a espacio recuperable garantizado. Mover a Papelera no libera espacio hasta vaciarla desde Finder.").font(.caption).foregroundStyle(.secondary) } }
             }
         }
     }
 }
 struct FileBrowser: View {
     @EnvironmentObject var m: AppModel
-    let title: String; let files: [FileRecord]; @Binding var review: Bool; var note = ""
+    let title: String
+    var scope: FileScope = .all
+    var directory: String? = nil
+    var category = "Todas"
+    @Binding var review: Bool
+    var note = ""
     @ViewState private var query = ""
     @ViewState private var sort = "Tamaño"
     @ViewState private var riskFilter = "Todos"
-    var filtered: [FileRecord] {
-        let list = files.filter { (query.isEmpty || $0.path.localizedCaseInsensitiveContains(query)) && (riskFilter == "Todos" || $0.risk.rawValue == riskFilter) }
-        return list.sorted { sort == "Nombre" ? $0.path < $1.path : sort == "Antigüedad" ? $0.modified < $1.modified : $0.size > $1.size }
-    }
+    @ViewState private var result = FileQueryResult()
+    @ViewState private var filtering = false
+    var request: FileQuery { FileQuery(revision: m.scanRevision, scope: scope, directory: directory, category: category, search: query, order: sort, risk: riskFilter) }
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title).font(.headline)
             if !note.isEmpty { Text(note).font(.callout).foregroundStyle(.secondary) }
-            HStack { TextField("Buscar por nombre o ruta", text: $query).textFieldStyle(.roundedBorder); Picker("Orden", selection: $sort) { ForEach(["Tamaño", "Nombre", "Antigüedad"], id: \.self) { Text($0) } }.frame(width: 180); Picker("Riesgo", selection: $riskFilter) { ForEach(["Todos", "Revisar", "Regenerable", "Protegido"], id: \.self) { Text($0) } }.frame(width: 180) }
-            if m.scan == nil { ContentUnavailableView("Elige una carpeta", systemImage: "folder.badge.questionmark", description: Text("El análisis se limita a la carpeta que autorices.")) } else if filtered.isEmpty { ContentUnavailableView("Sin resultados", systemImage: "checkmark.circle", description: Text("No hay archivos que coincidan en el alcance analizado.")) } else {
-                List(filtered.prefix(3000)) { file in
-                    HStack(spacing: 12) {
-                        Toggle("Seleccionar \(file.url.lastPathComponent)", isOn: Binding(get: { m.selected.contains(file.path) }, set: { if $0 { m.selected.insert(file.path) } else { m.selected.remove(file.path) } })).labelsHidden().toggleStyle(.checkbox).disabled(file.risk == .protected || file.links > 1 || m.busy)
-                        Image(systemName: file.risk == .protected ? "lock.fill" : "doc").foregroundStyle(file.risk == .protected ? .red : .mint)
-                        VStack(alignment: .leading, spacing: 3) { Text(file.url.lastPathComponent).lineLimit(1); Text(file.path).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle); Text("\(file.category) · \(file.risk.rawValue) · \(file.modified.formatted(date: .abbreviated, time: .omitted))").font(.caption2).foregroundStyle(.secondary) }.help(file.reason + "\n" + file.path)
-                        Spacer(); Text(sizeText(file.size)).monospacedDigit(); Button { NSWorkspace.shared.activateFileViewerSelecting([file.url]) } label: { Image(systemName: "folder") }.help("Mostrar en Finder"); Button { NSWorkspace.shared.open(file.url) } label: { Image(systemName: "eye") }.help("Abrir con la aplicación predeterminada")
-                    }.padding(.vertical, 5)
+            HStack {
+                TextField("Buscar por nombre o ruta", text: $query).textFieldStyle(.roundedBorder)
+                Picker("Orden", selection: $sort) { ForEach(["Tamaño", "Nombre", "Antigüedad"], id: \.self) { Text($0) } }.frame(width: 170)
+                Picker("Riesgo", selection: $riskFilter) { ForEach(["Todos", "Revisar", "Regenerable", "Protegido"], id: \.self) { Text($0) } }.frame(width: 170)
+            }
+            HStack {
+                Button("Seleccionar todos") { m.selectAll(request, recommended: false) }.disabled(m.scan == nil || result.count == 0 || m.busy || filtering)
+                Button { m.selectAll(request, recommended: true) } label: { Label("Seleccionar recomendados", systemImage: "checkmark.shield") }.disabled(m.scan == nil || result.count == 0 || m.busy || filtering)
+                Spacer(); Button("Desmarcar todo") { m.selected = [] }.disabled(m.selected.isEmpty || m.busy)
+            }
+            Text("Se aplica a todos los resultados del filtro, no solo a la página visible. Los protegidos, enlaces y exclusiones se conservan.").font(.caption2).foregroundStyle(.secondary)
+            if filtering { ProgressView("Preparando lista fuera de la interfaz…").controlSize(.small) }
+            if m.scan == nil { ContentUnavailableView("Elige una carpeta", systemImage: "folder.badge.questionmark", description: Text("El análisis se limita a la carpeta que autorices.")) }
+            else if result.rows.isEmpty && !filtering { ContentUnavailableView("Sin resultados", systemImage: "checkmark.circle", description: Text("No hay archivos que coincidan en el alcance analizado.")) }
+            else {
+                List {
+                    ForEach(result.rows) { file in
+                        HStack(spacing: 12) {
+                            Toggle("Seleccionar \(file.url.lastPathComponent)", isOn: Binding(get: { m.selected.contains(file.path) }, set: { if $0 { m.selected.insert(file.path) } else { m.selected.remove(file.path) } })).labelsHidden().toggleStyle(.checkbox).disabled(!Safety.canSelect(file, roots: m.scan?.scopeRoots ?? [], exclusions: m.exclusions) || m.busy)
+                            let tool = scope == .development ? m.developmentIcon(file) : nil
+                            ApplicationIcon(path: tool, fileType: tool == nil ? file.url.pathExtension : nil, fallback: scope == .development ? "shippingbox" : "doc", size: 28)
+                                .overlay(alignment: .bottomTrailing) { if file.risk == .protected { Image(systemName: "lock.fill").font(.system(size: 10)).foregroundStyle(.red).background(.background, in: Circle()) } }
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(file.url.lastPathComponent).lineLimit(1)
+                                Text(file.path).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                                Text("\(file.category) · \(file.risk.rawValue) · \(file.modified.formatted(date: .abbreviated, time: .omitted))").font(.caption2).foregroundStyle(.secondary)
+                            }.help(file.reason + "\n" + file.path)
+                            Spacer(); Text(sizeText(file.size)).monospacedDigit()
+                            Button { NSWorkspace.shared.activateFileViewerSelecting([file.url]) } label: { Image(systemName: "folder") }.help("Mostrar en Finder")
+                            Button { NSWorkspace.shared.open(file.url) } label: { Image(systemName: "eye") }.help("Abrir con la aplicación predeterminada")
+                        }.padding(.vertical, 5)
+                    }
                 }.listStyle(.inset).clipShape(RoundedRectangle(cornerRadius: 12))
             }
-            HStack { Text("\(filtered.count) resultados\(filtered.count > 3000 ? " · se muestran los primeros 3000; refina la búsqueda o exporta" : "")").font(.caption).foregroundStyle(.secondary); Spacer(); Button("Quitar selección") { m.selected = [] }.disabled(m.selected.isEmpty); Button("Revisar selección (\(m.selected.count))") { review = true }.buttonStyle(.borderedProminent).tint(.teal).disabled(m.selected.isEmpty || m.busy) }
+            HStack {
+                Text("\(result.count) resultados\(result.count > result.rows.count ? " · se muestran \(result.rows.count); refina la búsqueda o exporta" : "")").font(.caption).foregroundStyle(.secondary)
+                Spacer(); Button("Revisar selección (\(m.selected.count))") { review = true }.buttonStyle(.borderedProminent).tint(.teal).disabled(m.selected.isEmpty || m.busy)
+            }
+        }.task(id: request) {
+            let spec = request, files = m.scan?.files ?? []
+            filtering = true
+            do {
+                try await Task.sleep(for: .milliseconds(120))
+                let worker = Task.detached(priority: .utility) { try spec.evaluate(files: files) }
+                let next = try await withTaskCancellationHandler { try await worker.value } onCancel: { worker.cancel() }
+                if !Task.isCancelled && spec == request { result = next; filtering = false }
+            } catch { if !Task.isCancelled { filtering = false } }
         }
     }
 }
@@ -180,15 +226,67 @@ struct ReviewSheet: View {
     @EnvironmentObject var m: AppModel
     @Environment(\.dismiss) var dismiss
     @ViewState private var accepted = false
-    var records: [FileRecord] { m.scan?.files.filter { m.selected.contains($0.path) } ?? [] }
+    @ViewState private var records: [FileRecord] = []
+    @ViewState private var logical: Int64 = 0
+    @ViewState private var loaded = false
+    @ViewState private var query = ""
+    @ViewState private var shown = FileQueryResult()
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             Label("Revisar antes de mover", systemImage: "trash").font(.title2.bold())
             Text("Se moverán únicamente los archivos seleccionados a la Papelera. Cierra sus aplicaciones antes de continuar. Puedes restaurarlos desde Finder mientras no vacíes la Papelera.").foregroundStyle(.secondary)
-            Text("Tamaño lógico: \(sizeText(records.reduce(0) { $0 + $1.size })) · No es espacio físico garantizado. APFS puede compartir bloques.").font(.callout)
-            List(records) { f in VStack(alignment: .leading, spacing: 5) { HStack { Text(f.url.lastPathComponent).bold(); Spacer(); Text(sizeText(f.size)); Text(f.risk.rawValue).foregroundStyle(.orange) }; Text(f.path).font(.caption).textSelection(.enabled); Text(f.reason).font(.caption).foregroundStyle(.secondary); Text("Aplicación responsable: no verificada. Recuperación: Papelera, salvo restricciones del volumen.").font(.caption2) } }
-            Toggle("He revisado las rutas y autorizo mover estos archivos a la Papelera.", isOn: $accepted)
-            HStack { Button("Cancelar") { dismiss() }; Spacer(); Button("Autorizar y mover a Papelera", role: .destructive) { m.trashSelection(); dismiss() }.disabled(!accepted || records.isEmpty) }
-        }.padding(26).frame(width: 760, height: 560)
+            Text("\(records.count) archivos · Tamaño lógico: \(sizeText(logical)) · No es espacio físico garantizado.").font(.callout)
+            TextField("Buscar en la selección", text: $query).textFieldStyle(.roundedBorder)
+            if !loaded { ProgressView("Preparando selección…") }
+            List(shown.rows) { f in VStack(alignment: .leading, spacing: 5) { HStack { Text(f.url.lastPathComponent).bold(); Spacer(); Text(sizeText(f.size)); Text(f.risk.rawValue).foregroundStyle(.orange) }; Text(f.path).font(.caption).textSelection(.enabled); Text(f.reason).font(.caption).foregroundStyle(.secondary) } }
+            Text("Se muestran hasta 1000 coincidencias. La autorización comprende los \(records.count) archivos seleccionados.").font(.caption).foregroundStyle(.secondary)
+            Toggle("Autorizo mover estos archivos a la Papelera tras revisar la selección.", isOn: $accepted)
+            HStack { Button("Cancelar") { dismiss() }; Spacer(); Button("Autorizar y mover a Papelera", role: .destructive) { m.trashSelection(); dismiss() }.disabled(!accepted || !loaded || records.isEmpty) }
+        }.padding(26).frame(width: 780, height: 620)
+        .task {
+            let paths = m.selected, map = m.scanIndex.byPath
+            let result = await Task.detached(priority: .utility) { let files = paths.compactMap { map[$0] }; return (files, files.reduce(Int64(0)) { $0 + $1.size }) }.value
+            if !Task.isCancelled { records = result.0; logical = result.1; loaded = true }
+        }
+        .task(id: query + "|" + String(loaded)) {
+            let files = records, query = query
+            let result = await Task.detached(priority: .utility) { try? FileQuery(search: query).evaluate(files: files) }.value
+            if !Task.isCancelled { shown = result ?? FileQueryResult() }
+        }
+    }
+}
+struct QuickCleanSheet: View {
+    @EnvironmentObject var m: AppModel
+    @Environment(\.dismiss) var dismiss
+    let plan: QuickCleanPlan
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Label("Limpieza rápida recomendada", systemImage: "checkmark.shield").font(.title2.bold())
+            Text("MacGuardian ya eligió los candidatos. No necesitas marcarlos uno por uno.")
+            Text("\(plan.files.count) archivos · \(sizeText(plan.logical)) lógicos · \(plan.examined) entradas examinadas").font(.headline)
+            Text("Solo cachés regenerables reconocidas e informes de fallos antiguos. Se omiten las cachés de herramientas detectadas en ejecución. Se revalida antes de actuar. No se vacía la Papelera ni se borran documentos.").font(.callout).foregroundStyle(.secondary)
+            if plan.files.isEmpty { ContentUnavailableView("Nada que recomendar con seguridad", systemImage: "checkmark.shield", description: Text("Los archivos recientes, protegidos o de herramientas activas se han conservado.")) }
+            else { List(Array(plan.files.prefix(1000))) { file in VStack(alignment: .leading, spacing: 4) { HStack { Text(file.url.lastPathComponent).bold(); Spacer(); Text(sizeText(file.size)) }; Text(file.path).font(.caption).textSelection(.enabled) } } }
+            if !plan.issues.isEmpty { DisclosureGroup("Cobertura e incidencias (\(plan.issues.count))") { ScrollView { Text(plan.issues.joined(separator: "\n")).font(.caption).textSelection(.enabled) }.frame(maxHeight: 100) } }
+            Text("El tamaño lógico no equivale a espacio liberado. El resumen medirá el disponible antes y después; otros procesos también pueden cambiarlo.").font(.caption).foregroundStyle(.secondary)
+            HStack { Button("Cancelar") { dismiss() }; Spacer(); Button("Autorizar limpieza recomendada") { m.executeQuick(plan) }.buttonStyle(.borderedProminent).tint(.teal).disabled(plan.files.isEmpty || m.busy) }
+        }.padding(26).frame(width: 780, height: 580)
+    }
+}
+struct CleanupSummarySheet: View {
+    @Environment(\.dismiss) var dismiss
+    let report: CleanupReport
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Label(report.cancelled ? "Limpieza cancelada: resultado parcial" : "Resumen de limpieza", systemImage: "checkmark.circle").font(.title2.bold())
+            HStack { MetricCard(label: "Archivos en Papelera", value: String(report.moved.count), symbol: "trash", detail: "No se borraron permanentemente"); MetricCard(label: "Tamaño lógico movido", value: sizeText(report.logicalMoved), symbol: "doc.on.doc", detail: "No equivale a espacio liberado") }
+            LabeledContent("Disponible antes", value: report.freeBefore.map(sizeText) ?? "No medido")
+            LabeledContent("Disponible después", value: report.freeAfter.map(sizeText) ?? "No medido")
+            LabeledContent("Variación observada", value: report.observedFreeChange.map { ($0 >= 0 ? "+" : "−") + sizeText(abs($0)) } ?? "No medida")
+            Text("La Papelera sigue ocupando espacio. No se promete que esta variación se deba exclusivamente a la limpieza: APFS y otros procesos pueden cambiarla. Para recuperar archivos, usa Finder → Papelera → Sacar de la papelera.").font(.caption).foregroundStyle(.secondary)
+            DisclosureGroup("Archivos movidos (\(report.moved.count))") { ScrollView { LazyVStack(alignment: .leading) { ForEach(Array(report.moved.prefix(1000)), id: \.self) { Text($0).font(.caption).textSelection(.enabled) } } }.frame(maxHeight: 100) }
+            if !report.failures.isEmpty { Text("Incidencias: \(report.failures.count)").font(.headline); List(Array(report.failures.prefix(1000))) { failure in VStack(alignment: .leading) { Text(failure.path).font(.caption).textSelection(.enabled); Text(failure.reason).font(.caption).foregroundStyle(.secondary) } }.frame(maxHeight: 130) }
+            HStack { Spacer(); Button("Entendido") { dismiss() }.buttonStyle(.borderedProminent).tint(.teal) }
+        }.padding(26).frame(width: 760).frame(minHeight: 450, maxHeight: 650)
     }
 }

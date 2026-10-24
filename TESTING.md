@@ -1,5 +1,20 @@
 # Verificación — 24 de octubre de 2026
 
+## Versión 0.2.0
+
+- **27 pruebas aprobadas, 0 fallos**, conjunto local en 1.698 s. Incluyen recomendaciones conservadoras, selección masiva, cancelación, auditoría, cambios concurrentes y protección de aplicaciones activas.
+- Índice y consulta de 50 000 registros sintéticos en segundo plano: 0.810 s en una ejecución; el hilo principal mantuvo su actividad de prueba. No representa un análisis completo del disco.
+- Prueba visual con 12 002 archivos sintéticos: seleccionar todos eligió 12 001 y excluyó una base de datos protegida; seleccionar recomendados eligió únicamente un bytecode Python antiguo.
+- Se movió exclusivamente ese archivo de prueba a Papelera mediante la interfaz real: un archivo, 26 bytes lógicos, cero errores; el resumen separó el tamaño movido de la variación de espacio libre. No se vació la Papelera.
+- Se creó una aplicación desechable propia, se abrió y se probó el cierre forzado y retirada a Papelera. No se cerraron ni desinstalaron aplicaciones personales.
+- Limpieza rápida: 2668 entradas examinadas, cero recomendaciones seguras en esa muestra; autorización desactivada correctamente.
+- Se verificaron iconos de procesos, inicio automático y desarrollo, navegación y hojas de autorización.
+- Muestra puntual en reposo tras navegar: huella física 85.6 MB, máxima 118.3 MB; el hilo principal esperaba eventos. No es un límite garantizado.
+- Compilación Release arm64 con firma ad hoc. La compatibilidad con otros equipos y versiones de macOS sigue sin verificarse.
+
+Las siguientes secciones conservan el registro histórico de 0.1.0; sus cantidades y pruebas corresponden a esa versión.
+
+
 ## Entorno observado
 
 - macOS 27.0.1 (26A434), Darwin 27, arm64.

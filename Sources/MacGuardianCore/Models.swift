@@ -12,6 +12,7 @@ public struct FileRecord: Identifiable, Codable, Sendable, Hashable {
     public let device: Int32
     public let inode: UInt64
     public let links: UInt16
+    public let owner: UInt32
     public let category: String
     public let risk: Risk
     public let reason: String
@@ -21,7 +22,7 @@ public struct FileRecord: Identifiable, Codable, Sendable, Hashable {
         guard lstat(url.path, &s) == 0, (s.st_mode & S_IFMT) == S_IFREG else { throw GuardianError.unsafe("No es un archivo regular: \(url.path)") }
         let date = Date(timeIntervalSince1970: Double(s.st_mtimespec.tv_sec) + Double(s.st_mtimespec.tv_nsec) / 1e9)
         let c = classify(url, modified: date, now: now)
-        return FileRecord(path: Safety.lexicalPath(url.path), size: s.st_size, allocated: Int64(s.st_blocks) * 512, modified: date, device: s.st_dev, inode: s.st_ino, links: s.st_nlink, category: c.0, risk: c.1, reason: c.2)
+        return FileRecord(path: Safety.lexicalPath(url.path), size: s.st_size, allocated: Int64(s.st_blocks) * 512, modified: date, device: s.st_dev, inode: s.st_ino, links: s.st_nlink, owner: s.st_uid, category: c.0, risk: c.1, reason: c.2)
     }
 }
 public enum GuardianError: LocalizedError {
@@ -49,6 +50,8 @@ public func classify(_ url: URL, modified: Date, now: Date) -> (String, Risk, St
 public struct ScanResult: Codable, Sendable {
     public var root: String
     public var files: [FileRecord] = []
+    public var authorizedRoots: [String]?
+    public var scopeRoots: [String] { authorizedRoots ?? [root] }
     public var visited: Int = 0
     public var issues: [String] = []
     public var omittedIssues = 0

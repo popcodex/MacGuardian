@@ -35,11 +35,14 @@ public struct ProcessRow: Identifiable, Sendable {
 }
 public enum ProcessService {
     public static func list() throws -> [ProcessRow] {
-        let output = try Command.run("/bin/ps", ["-axo", "pid=,ppid=,uid=,user=,%cpu=,rss=,etime=,stat=,comm="])
+        let output = try Command.run("/bin/ps", ["-ww", "-axo", "pid=,ppid=,uid=,user=,%cpu=,rss=,etime=,stat=,comm="])
+        return parse(output)
+    }
+    public static func parse(_ output: String) -> [ProcessRow] {
         return output.split(separator: "\n").compactMap { line in
             let c = line.split(maxSplits: 8, omittingEmptySubsequences: true, whereSeparator: { $0 == " " || $0 == "\t" }).map(String.init)
             guard c.count == 9, let pid = Int32(c[0]), let parent = Int32(c[1]), let uid = UInt32(c[2]), let cpu = Double(c[4]), let rss = Int64(c[5]) else { return nil }
-            return ProcessRow(pid: pid, parent: parent, uid: uid, user: c[3], cpu: cpu, memory: rss * 1024, elapsed: c[6], state: c[7], executable: c[8], name: URL(fileURLWithPath: c[8]).lastPathComponent)
+            return ProcessRow(pid: pid, parent: parent, uid: uid, user: c[3], cpu: cpu, memory: rss * 1024, elapsed: c[6], state: c[7], executable: c[8].trimmingCharacters(in: .whitespaces), name: URL(fileURLWithPath: c[8].trimmingCharacters(in: .whitespaces)).lastPathComponent)
         }.sorted { $0.cpu > $1.cpu }
     }
     public static func canTerminate(_ row: ProcessRow) -> Bool {
@@ -117,17 +120,45 @@ public struct AssociatedFile: Identifiable, Sendable {
     public let personal: Bool
 }
 public enum ApplicationService {
-    public static func list(roots: [URL]) -> [InstalledApp] {
-        var seen = Set<String>(); var apps: [InstalledApp] = []
+    public static func canonicalURL(_ url: URL) -> URL {
+        guard let resolved = realpath(url.path, nil) else { return url }
+        defer { free(resolved) }
+        return URL(fileURLWithPath: String(cString: resolved))
+    }
+    public static var defaultRoots: [URL] {
+        ["/Applications", "/System/Applications", "/System/Library/CoreServices/Applications", NSHomeDirectory() + "/Applications"].map { URL(fileURLWithPath: $0) }
+    }
+    public static func bundlePath(forExecutable path: String) -> String? {
+        let parts = path.split(separator: "/")
+        guard let index = parts.firstIndex(where: { $0.lowercased().hasSuffix(".app") }) else { return nil }
+        return "/" + parts[...index].joined(separator: "/")
+    }
+    public static func list(roots: [URL], discovered: [URL] = [], includeSpotlight: Bool = false) -> [InstalledApp] {
+        var candidates = discovered
+        if includeSpotlight, let output = try? Command.run("/usr/bin/mdfind", ["kMDItemContentType == 'com.apple.application-bundle'"]) {
+            candidates += output.split(separator: "\n").prefix(20_000).map { URL(fileURLWithPath: String($0)) }
+        }
         for root in roots {
-            guard let e = FileManager.default.enumerator(at: root, includingPropertiesForKeys: [.isSymbolicLinkKey], options: [.skipsPackageDescendants, .skipsHiddenFiles]) else { continue }
+            if root.pathExtension.lowercased() == "app" { candidates.append(root); continue }
+            guard let e = FileManager.default.enumerator(at: root, includingPropertiesForKeys: [.isSymbolicLinkKey, .isUbiquitousItemKey], options: [.skipsPackageDescendants, .skipsHiddenFiles]) else { continue }
             for case let url as URL in e {
-                if (try? url.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == true { e.skipDescendants(); continue }
-                guard url.pathExtension == "app", seen.insert(url.path).inserted, let b = Bundle(url: url) else { continue }
-                apps.append(InstalledApp(url: url, name: b.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? b.object(forInfoDictionaryKey: "CFBundleName") as? String ?? url.deletingPathExtension().lastPathComponent, version: b.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "No disponible", bundleID: b.bundleIdentifier ?? "", lastUsed: (try? url.resourceValues(forKeys: [.contentAccessDateKey]))?.contentAccessDate))
+                let values = try? url.resourceValues(forKeys: [.isSymbolicLinkKey, .isUbiquitousItemKey])
+                if values?.isUbiquitousItem == true { e.skipDescendants(); continue }
+                if url.pathExtension.lowercased() == "app" { candidates.append(url); e.skipDescendants() }
+                else if values?.isSymbolicLink == true { e.skipDescendants() }
             }
         }
-        return apps.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        var seen = Set<String>(), apps: [InstalledApp] = []
+        for candidate in candidates {
+            let url = canonicalURL(candidate)
+            let isInternalComponent = url.path.hasPrefix("/System/Library/") || url.path.hasPrefix("/Library/Apple/System/Library/")
+            if isInternalComponent && url.path != "/System/Library/CoreServices/Finder.app" && !roots.contains(where: { Safety.isInside(url.path, root: $0.path) }) { continue }
+            guard url.pathExtension.lowercased() == "app", bundlePath(forExecutable: url.path) == url.path, seen.insert(url.path).inserted,
+                  (try? url.resourceValues(forKeys: [.isUbiquitousItemKey]).isUbiquitousItem) != true,
+                  let b = Bundle(url: url) else { continue }
+            apps.append(InstalledApp(url: url, name: b.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? b.object(forInfoDictionaryKey: "CFBundleName") as? String ?? url.deletingPathExtension().lastPathComponent, version: b.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "No disponible", bundleID: b.bundleIdentifier ?? "", lastUsed: nil))
+        }
+        return apps.sorted { $0.name == $1.name ? $0.url.path < $1.url.path : $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
     public static func related(_ app: InstalledApp) -> [AssociatedFile] {
         guard !app.bundleID.isEmpty, !app.bundleID.contains("/"), app.bundleID != ".", app.bundleID != ".." else { return [] }
@@ -143,6 +174,7 @@ public struct StartupItem: Identifiable, Sendable {
     public let program: String
     public let type: String
     public let loaded: Bool?
+    public let iconPath: String?
 }
 public enum StartupService {
     public static func list() -> [StartupItem] {
@@ -151,7 +183,10 @@ public enum StartupService {
             let urls = (try? FileManager.default.contentsOfDirectory(at: URL(fileURLWithPath: root), includingPropertiesForKeys: nil)) ?? []
             return urls.filter { $0.pathExtension == "plist" }.compactMap { url in
                 guard let data = try? Data(contentsOf: url), let d = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any] else { return nil }
-                return StartupItem(label: d["Label"] as? String ?? url.lastPathComponent, path: url.path, program: d["Program"] as? String ?? (d["ProgramArguments"] as? [String])?.first ?? "No especificado", type: type, loaded: nil)
+                let arguments = d["ProgramArguments"] as? [String] ?? []
+                let program = d["Program"] as? String ?? arguments.first ?? "No especificado"
+                let iconPath = ([program] + arguments).first(where: { $0.hasPrefix("/") && $0.contains(".app") }).flatMap { ApplicationService.bundlePath(forExecutable: $0) }
+                return StartupItem(label: d["Label"] as? String ?? url.lastPathComponent, path: url.path, program: program, type: type, loaded: nil, iconPath: iconPath)
             }
         }.sorted { $0.label < $1.label }
     }

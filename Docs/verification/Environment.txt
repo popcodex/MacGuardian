@@ -7,5 +7,6 @@ Identidades de firma válidas: 0.
 Firma de la aplicación: ad hoc + hardened runtime; recursos sellados.
 Gatekeeper spctl --assess: rejected, código 3; sin Developer ID/notarización.
 La aplicación se abrió localmente y se probó con interfaz nativa.
-Huella física puntual en reposo (sample, 1 s): 32.6 MB; pico 32.9 MB.
+Huella física puntual en reposo (sample, 1 s): 85.6 MB; pico 118.3 MB.
 El muestreo no constituye un límite de memoria ni un benchmark de todo el disco.
+Versión verificada: 0.2.0. Pruebas automatizadas: 27 aprobadas.

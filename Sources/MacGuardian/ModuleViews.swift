@@ -8,43 +8,33 @@ struct StorageView: View {
     @Binding var review: Bool
     @ViewState private var category = "Todas"
     @ViewState private var directory: String?
-    struct Block: Identifiable { var id: String; var bytes: Int64; var isDirectory: Bool }
     var current: String { directory ?? m.scan?.root ?? "" }
-    var children: [Block] {
-        guard let scan = m.scan else { return [] }
-        var blocks: [String: Block] = [:]
-        for file in scan.files where Safety.isInside(file.path, root: current) {
-            let rest = file.path.dropFirst(current.count + (current.hasSuffix("/") ? 0 : 1)); let parts = rest.split(separator: "/")
-            guard let first = parts.first else { continue }
-            let key = (current == "/" ? "" : current) + "/" + first
-            var block = blocks[key] ?? Block(id: key, bytes: 0, isDirectory: parts.count > 1)
-            block.bytes += file.size; blocks[key] = block
-        }
-        return blocks.values.sorted { $0.bytes > $1.bytes }
-    }
-    var categories: [String] { ["Todas"] + Set(m.scan?.files.map(\.category) ?? []).sorted() }
-    var files: [FileRecord] { m.scan?.files.filter { Safety.isInside($0.path, root: current) && (category == "Todas" || $0.category == category) } ?? [] }
+    var summary: DirectorySummary { m.scanIndex.directories[current] ?? DirectorySummary() }
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             if let scan = m.scan {
-                HStack(spacing: 15) { MetricCard(label: "Tamaño lógico analizado", value: sizeText(scan.logical), symbol: "doc.on.doc", detail: "Incluye cada ruta de archivo regular"); MetricCard(label: "Bloques asignados", value: sizeText(scan.allocated), symbol: "externaldrive", detail: "Enlaces físicos contados una vez; clones APFS pueden compartir bloques") }.frame(height: 135)
-                HStack { Button { let parent = URL(fileURLWithPath: current).deletingLastPathComponent().path; directory = Safety.isInside(parent, root: scan.root) ? parent : scan.root } label: { Image(systemName: "arrow.up") }.disabled(current == scan.root); Text(current).font(.caption).lineLimit(1).truncationMode(.middle); Spacer(); Picker("Categoría", selection: $category) { ForEach(categories, id: \.self) { Text($0) } }.frame(width: 240) }
+                HStack(spacing: 15) {
+                    MetricCard(label: "Tamaño lógico analizado", value: sizeText(m.scanIndex.logical), symbol: "doc.on.doc", detail: "Incluye cada ruta de archivo regular")
+                    MetricCard(label: "Bloques asignados", value: sizeText(m.scanIndex.allocated), symbol: "externaldrive", detail: "Enlaces físicos contados una vez; APFS puede compartir bloques")
+                }.frame(height: 125)
+                HStack {
+                    Button { let parent = URL(fileURLWithPath: current).deletingLastPathComponent().path; directory = Safety.isInside(parent, root: scan.root) ? parent : scan.root } label: { Image(systemName: "arrow.up") }.disabled(current == scan.root)
+                    Text(current).font(.caption).lineLimit(1).truncationMode(.middle); Spacer()
+                    Picker("Categoría", selection: $category) { Text("Todas").tag("Todas"); ForEach(m.scanIndex.categories, id: \.self) { Text($0) } }.frame(width: 240)
+                }
                 GeometryReader { geo in
-                    let total = max(1, children.reduce(Int64(0)) { $0 + $1.bytes })
                     HStack(spacing: 2) {
-                        ForEach(Array(children.prefix(12).enumerated()), id: \.element.id) { index, block in
-                            Button {
-                                if block.isDirectory { directory = block.id } else { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: block.id)]) }
-                            } label: {
-                                VStack(alignment: .leading, spacing: 6) { Image(systemName: block.isDirectory ? "folder" : "doc"); Text(URL(fileURLWithPath: block.id).lastPathComponent).lineLimit(2); Text(sizeText(block.bytes)).font(.caption2) }.padding(8).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).background(Color(hue: Double(index) / 16 + 0.35, saturation: 0.52, brightness: 0.62), in: RoundedRectangle(cornerRadius: 7))
-                            }.buttonStyle(.plain).frame(width: max(2, (geo.size.width - 24) * CGFloat(block.bytes) / CGFloat(total))).clipped().help("\(block.id) · \(sizeText(block.bytes)) · Pulsa para explorar")
+                        ForEach(Array(summary.blocks.prefix(12).enumerated()), id: \.element.id) { index, block in
+                            Button { if block.isDirectory { directory = block.path } else { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: block.path)]) } } label: {
+                                VStack(alignment: .leading, spacing: 6) { Image(systemName: block.isDirectory ? "folder" : "doc"); Text(URL(fileURLWithPath: block.path).lastPathComponent).lineLimit(2); Text(sizeText(block.bytes)).font(.caption2) }.padding(8).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).background(Color(hue: Double(index) / 16 + 0.35, saturation: 0.52, brightness: 0.62), in: RoundedRectangle(cornerRadius: 7))
+                            }.buttonStyle(.plain).frame(width: max(2, (geo.size.width - 24) * CGFloat(block.bytes) / CGFloat(max(1, summary.logical)))).clipped().help("\(block.path) · \(sizeText(block.bytes)) · Pulsa para explorar")
                         }
                     }
-                }.frame(height: 105)
-                Text("Mapa proporcional por tamaño lógico · hasta 12 elementos mayores · pulsa una carpeta para navegar").font(.caption2).foregroundStyle(.secondary)
-                if !scan.issues.isEmpty || scan.truncated || scan.cancelled { DisclosureGroup("Cobertura parcial e incidencias (\(scan.issues.count + scan.omittedIssues))") { ScrollView { Text((scan.cancelled ? "Cancelado.\n" : "") + (scan.truncated ? "Límite de 250 000 entradas alcanzado.\n" : "") + scan.issues.joined(separator: "\n")).font(.caption).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading) }.frame(maxHeight: 100) } }
+                }.frame(height: 85)
+                Text("Mapa preparado una vez por análisis · 12 elementos mayores · pulsa una carpeta para navegar").font(.caption2).foregroundStyle(.secondary)
+                if !scan.issues.isEmpty || scan.truncated || scan.cancelled { DisclosureGroup("Cobertura parcial e incidencias (\(scan.issues.count + scan.omittedIssues))") { ScrollView { Text((scan.cancelled ? "Cancelado.\n" : "") + (scan.truncated ? "Límite de entradas alcanzado.\n" : "") + scan.issues.joined(separator: "\n")).font(.caption).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading) }.frame(maxHeight: 100) } }
             }
-            FileBrowser(title: "Archivos", files: files, review: $review)
+            FileBrowser(title: "Archivos", directory: current.isEmpty ? nil : current, category: category, review: $review)
         }.onChange(of: m.scan?.root) { _, _ in directory = nil; category = "Todas" }
     }
 }
@@ -52,33 +42,41 @@ struct ApplicationsView: View {
     @EnvironmentObject var m: AppModel
     @ViewState private var search = ""
     @ViewState private var confirm = false
+    @ViewState private var forceClose = false
+    @ViewState private var pendingApp: InstalledApp?
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack { TextField("Buscar aplicación o identificador", text: $search).textFieldStyle(.roundedBorder); Button("Actualizar") { Task { await m.inventories() } } }
-            Text("La revisión asociada utiliza el identificador exacto del paquete. Los datos compartidos y personales se conservan. La fecha de acceso no equivale a la última ejecución.").font(.callout).foregroundStyle(.secondary)
+            HStack { TextField("Buscar aplicación o identificador", text: $search).textFieldStyle(.roundedBorder); Button("Añadir carpeta…") { m.addApplicationRoot() }.disabled(m.busy || m.inventoryBusy); Menu("Carpetas extra") { ForEach(m.appRoots, id: \.self) { path in Button("Quitar: " + path) { m.removeApplicationRoot(path) } } }.disabled(m.appRoots.isEmpty || m.busy || m.inventoryBusy); Button("Actualizar") { Task { await m.inventories() } }.disabled(m.inventoryBusy || m.busy) }
+            Text("\(m.apps.count) paquetes: carpetas de Aplicaciones y del sistema, Spotlight y ubicaciones añadidas. La indexación y los permisos pueden limitar la lista; añade la carpeta de una aplicación ausente.").font(.caption).foregroundStyle(.secondary)
+            if m.inventoryBusy { ProgressView("Actualizando aplicaciones…").controlSize(.small) }
             HSplitView {
                 List(m.apps.filter { search.isEmpty || $0.name.localizedCaseInsensitiveContains(search) || $0.bundleID.localizedCaseInsensitiveContains(search) }) { app in
                     Button { m.inspect(app) } label: {
-                        HStack { Image(nsImage: NSWorkspace.shared.icon(forFile: app.url.path)).resizable().frame(width: 36, height: 36); VStack(alignment: .leading) { Text(app.name).fontWeight(.medium); Text("\(app.version) · \(app.running ? "En ejecución" : "Cerrada")").font(.caption).foregroundStyle(.secondary) }; Spacer() }.padding(.vertical, 5).contentShape(Rectangle())
+                        HStack { ApplicationIcon(path: app.url.path, size: 36); VStack(alignment: .leading) { Text(app.name).fontWeight(.medium); Text("\(app.version) · \(m.isRunning(app) ? "En ejecución" : "Cerrada")").font(.caption).foregroundStyle(.secondary); Text(app.url.deletingLastPathComponent().path).font(.caption2).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle) }; Spacer() }.padding(.vertical, 5).contentShape(Rectangle())
                     }.buttonStyle(.plain)
                 }.frame(minWidth: 260)
                 ScrollView {
                     if let app = m.appDetails {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text(app.name).font(.title2.bold()); Text(app.bundleID).font(.caption).textSelection(.enabled); Text(app.url.path).font(.caption).textSelection(.enabled)
+                            HStack { ApplicationIcon(path: app.url.path, size: 44); Text(app.name).font(.title2.bold()) }
+                            Text(app.bundleID).font(.caption).textSelection(.enabled); Text(app.url.path).font(.caption).textSelection(.enabled)
                             Text("Tamaño lógico: \(m.appSize.map(sizeText) ?? "Calculando…")\(m.appSizePartial ? " (parcial)" : "")")
                             Text("Desarrollador: no verificado mediante firma. Última ejecución: no disponible.").font(.caption).foregroundStyle(.secondary)
                             HStack { Button("Mostrar en Finder") { NSWorkspace.shared.activateFileViewerSelecting([app.url]) }; Button("Abrir") { NSWorkspace.shared.open(app.url) } }
                             Divider(); Text("Datos asociados · conservar por defecto").font(.headline)
                             ForEach(m.associated) { item in VStack(alignment: .leading, spacing: 5) { Text(item.url.path).font(.caption).textSelection(.enabled); Text(item.reason).font(.caption2).foregroundStyle(.secondary); Button("Revisar en Finder") { NSWorkspace.shared.activateFileViewerSelecting([item.url]) } } }
-                            if m.associated.isEmpty { Text("Sin coincidencias exactas en ubicaciones accesibles. Esto no garantiza ausencia de otros archivos.").font(.caption).foregroundStyle(.secondary) }
-                            Divider(); Text("Para aplicaciones con controladores, VPN, antivirus o servicios privilegiados, utiliza el desinstalador del fabricante. Esta acción mueve solo el paquete .app y conserva sus datos.").font(.caption).foregroundStyle(.secondary)
-                            Button("Mover aplicación a Papelera…", role: .destructive) { confirm = true }.disabled(app.running || app.bundleID.hasPrefix("com.apple.") || app.bundleID == "local.macguardian.app")
+                            if m.associated.isEmpty { Text("Sin coincidencias exactas accesibles. Esto no garantiza ausencia de otros archivos.").font(.caption).foregroundStyle(.secondary) }
+                            Divider(); Text("Para controladores, VPN, antivirus o servicios privilegiados, usa el desinstalador del fabricante. Aquí se mueve solo el paquete .app y se conservan sus datos.").font(.caption).foregroundStyle(.secondary)
+                            Button(m.isRunning(app) ? "Forzar cierre y desinstalar…" : "Mover aplicación a Papelera…", role: .destructive) { pendingApp = app; forceClose = m.isRunning(app); confirm = true }.disabled(m.busy || app.bundleID.hasPrefix("com.apple.") || app.bundleID == "local.macguardian.app")
+                            if m.isRunning(app) { Text("Forzar el cierre puede perder cambios sin guardar. Solo se desinstalará si se verifica que sus procesos terminaron.").font(.caption).foregroundStyle(.orange) }
                         }.padding(18)
                     } else { ContentUnavailableView("Selecciona una aplicación", systemImage: "app.badge") }
                 }.frame(minWidth: 340)
             }
-        }.alert("¿Mover esta aplicación a la Papelera?", isPresented: $confirm) { Button("Cancelar", role: .cancel) {}; Button("Autorizar", role: .destructive) { if let app = m.appDetails { m.recycleApp(app) } } } message: { Text("\(m.appDetails?.url.path ?? "")\nLos datos asociados permanecerán en el disco. Puedes restaurar el paquete desde la Papelera. No equivale a ejecutar el desinstalador del fabricante.") }
+        }.alert(forceClose ? "¿Forzar el cierre y desinstalar?" : "¿Mover esta aplicación a la Papelera?", isPresented: $confirm) {
+            Button("Cancelar", role: .cancel) { pendingApp = nil }
+            Button(forceClose ? "Autorizar cierre y desinstalación" : "Autorizar", role: .destructive) { if let app = pendingApp { m.recycleApp(app, forceClose: forceClose) }; pendingApp = nil }
+        } message: { Text("\(pendingApp?.url.path ?? "")\n\(forceClose ? "Se pueden perder cambios sin guardar. Si el cierre no se confirma, la desinstalación se detiene.\n" : "")Los datos asociados se conservarán. El paquete se moverá a la Papelera; no sustituye al desinstalador del fabricante.") }
     }
 }
 struct ProcessesView: View {
@@ -95,6 +93,7 @@ struct ProcessesView: View {
             Text("CPU de ps: promedio durante la vida del proceso; puede superar 100 % con varios núcleos. Memoria: RSS. Solo se permite cerrar aplicaciones identificadas por macOS, del usuario actual y fuera del sistema.").font(.caption).foregroundStyle(.secondary)
             List(rows) { row in
                 HStack {
+                    ApplicationIcon(path: ApplicationService.bundlePath(forExecutable: row.executable) ?? row.executable, fallback: "gearshape.fill", size: 32)
                     VStack(alignment: .leading, spacing: 4) { Text(row.name).bold(); Text("PID \(row.pid) · padre \(row.parent) · \(row.user) · \(row.elapsed) · \(row.state)").font(.caption).foregroundStyle(.secondary); Text(row.observation).font(.caption2).foregroundStyle(.secondary) }.help(row.executable)
                     Spacer(); Text(String(format: "%.1f %%", row.cpu)).monospacedDigit().frame(width: 70); Text(sizeText(row.memory)).frame(width: 85)
                     Menu { Button("Mostrar ejecutable") { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: row.executable)]) }; Button("Solicitar cierre…") { force = false; chosen = row }.disabled(!ProcessService.canTerminate(row)); Button("Forzar cierre…", role: .destructive) { force = true; chosen = row }.disabled(!ProcessService.canTerminate(row)) } label: { Image(systemName: "ellipsis.circle") }.fixedSize()
@@ -109,7 +108,16 @@ struct StartupView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Card { Label("Gestionado por macOS", systemImage: "lock.shield").font(.headline); Text("Esta lista muestra archivos plist accesibles, no un inventario completo de elementos modernos. La presencia de un archivo no prueba que el servicio esté cargado. SMAppService solo administra los servicios propios; los elementos de terceros se controlan en Ajustes.").foregroundStyle(.secondary); Button("Abrir Ítems de inicio y extensiones") { SMAppService.openSystemSettingsLoginItems() } }
-            List(m.startup) { item in VStack(alignment: .leading, spacing: 5) { HStack { Text(item.label).bold(); Spacer(); Text(item.type).font(.caption).foregroundStyle(.secondary); Button("Finder") { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: item.path)]) } }; Text(item.program).font(.caption).textSelection(.enabled); Text("\(item.path) · Estado y desarrollador: no verificados · Impacto: no medido").font(.caption2).foregroundStyle(.secondary) }.padding(.vertical, 5) }
+            List(m.startup) { item in
+                HStack(alignment: .top, spacing: 12) {
+                    ApplicationIcon(path: m.startupIcon(item), fallback: "gearshape.2.fill", size: 34)
+                    VStack(alignment: .leading, spacing: 5) {
+                        HStack { Text(item.label).bold(); Spacer(); Text(item.type).font(.caption).foregroundStyle(.secondary); Button("Finder") { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: item.path)]) } }
+                        Text(item.program).font(.caption).textSelection(.enabled)
+                        Text("\(item.path) · Estado y desarrollador: no verificados · Impacto: no medido").font(.caption2).foregroundStyle(.secondary)
+                    }
+                }.padding(.vertical, 5)
+            }
         }
     }
 }

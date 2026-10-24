@@ -1,9 +1,11 @@
-MacGuardian 0.1.0 · Edición personal para Apple Silicon
+MacGuardian 0.2.0 · Edición personal para Apple Silicon
 
 1. Arrastra MacGuardian.app al enlace Aplicaciones.
 2. Expulsa este disco y abre MacGuardian desde Aplicaciones.
 3. Selecciona una carpeta para un análisis de solo lectura.
-4. Revisa cada selección antes de autorizar moverla a Papelera.
+4. Usa Seleccionar todos o Seleccionar recomendados en Limpieza y Almacenamiento.
+5. Desde Inicio, Limpieza rápida prepara candidatos sin marcar uno por uno.
+6. Autoriza una vez y consulta el resumen de archivos y espacio disponible.
 
 La compilación local tiene firma ad hoc. No está notarizada por Apple.
 Si macOS impide abrirla, revisa Ajustes del Sistema > Privacidad y seguridad
