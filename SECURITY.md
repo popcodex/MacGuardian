@@ -5,7 +5,7 @@ El análisis es de solo lectura. No hay limpieza al iniciar, al cerrar, programa
 ## Movimiento de archivos a Papelera
 
 - Selección inicialmente vacía y revisión de nombre, ruta, tamaño, clasificación, motivo y recuperación.
-- Confirmación explícita separada: casilla para selección manual y botón específico para el plan de limpieza rápida.
+- Autorización explícita: casilla para la selección manual; en Inicio, pulsar LIMPIEZA RÁPIDA autoriza la selección y el movimiento automático de los recomendados.
 - Solo archivos regulares del alcance del análisis o del plan rápido y del usuario actual.
 - Exclusiones y rutas críticas se validan otra vez antes de actuar. Se rechazan paquetes de aplicación, fototecas, .git, bases de datos y ubicaciones sensibles identificadas.
 - Rechazo de enlaces simbólicos en el archivo y en todos sus ancestros. Enlaces físicos con más de un nombre quedan bloqueados.
@@ -45,4 +45,4 @@ Seleccionar todos incluye archivos personales cuando están dentro del filtro de
 
 Seleccionar recomendados no se basa únicamente en tamaño o antigüedad. Solo usa bytecode Python antiguo o raíces reconocidas de cachés pip, npm, Homebrew y Xcode, así como informes .ips/.crash antiguos dentro de los diagnósticos del usuario. Se conserva lo reciente, protegido o vinculado a herramientas activas. Sin inventario fiable de procesos no se proponen recomendaciones. Los datos regenerables pueden requerir descargas o nuevas compilaciones más lentas.
 
-La limpieza rápida no inicia modificaciones al prepararse; muestra un plan y requiere autorización. No vacía la Papelera. Puede no encontrar nada recomendable: no se inventan candidatos ni resultados. El registro por archivo usa anexado con O_NOFOLLOW/O_NONBLOCK y rechaza enlaces físicos y tipos especiales. Si no se puede escribir, no se avanza a otros archivos.
+La pulsación del botón LIMPIEZA RÁPIDA autoriza el flujo completo: análisis, selección automática y movimiento de los recomendados a Papelera, sin confirmación intermedia. No vacía la Papelera. Puede no encontrar nada recomendable: no se inventan candidatos ni resultados. El registro por archivo usa anexado con O_NOFOLLOW/O_NONBLOCK y rechaza enlaces físicos y tipos especiales. Si no se puede escribir, no se avanza a otros archivos.

@@ -1,5 +1,12 @@
 # Historial
 
+## 0.2.1 — 2026-10-24
+
+- Botón LIMPIEZA RÁPIDA como primera acción en Inicio. Su pulsación autoriza el análisis, selección recomendada y movimiento automático a Papelera; sin hoja intermedia ni selección manual.
+- Resumen también cuando no se encuentran candidatos, sin marcarlo como error.
+- Navegación mediante botones propios, cabecera opaca y contenido limitado al área de la ventana para evitar barras superpuestas.
+- 29 pruebas, incluida la secuencia automática con caché antigua sintética y conservación de archivos recientes y personales.
+
 ## 0.2.0 — 2026-10-24
 
 - Seleccionar todos y seleccionar recomendados en Limpieza y Almacenamiento, aplicados al filtro completo y preservando protegidos, exclusiones y enlaces físicos.

@@ -25,7 +25,7 @@ El mapa agrupa hijos directos y acumula tamaños durante la indexación. El tama
 
 El escaneo general retiene hasta 250 000 entradas; el rápido tiene un presupuesto de 100 000 entradas repartidas entre raíces conocidas. No se enumeran carpetas personales para buscar candidatos rápidos.
 
-La limpieza rápida prepara un plan inmutable sin seleccionar uno por uno, pero necesita una autorización explícita antes de modificar. Sus recomendaciones se revalidan frente a procesos activos. No hay vaciado automático de Papelera ni optimizaciones privadas del sistema.
+El botón LIMPIEZA RÁPIDA autoriza la operación completa. Prepara un plan inmutable y ejecuta automáticamente los recomendados sin hoja intermedia ni selección manual. Sus recomendaciones se revalidan frente a procesos activos. No hay vaciado automático de Papelera ni optimizaciones privadas del sistema.
 
 Cada archivo tiene una autorización y un resultado en `history.actions.jsonl`. El archivo se abre sin seguir enlaces, no se aceptan tipos especiales ni enlaces físicos, y el fallo del diario detiene nuevas modificaciones. El historial JSON mantiene las operaciones resumidas para evitar una reescritura completa por archivo.
 

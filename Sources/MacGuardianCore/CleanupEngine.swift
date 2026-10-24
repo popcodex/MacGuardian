@@ -29,13 +29,13 @@ public enum CleanupEngine {
         if let error = coordinationError { throw error }; if let error = actionError { throw error }
         return destination as URL?
     }
-    /// Only called after a separate explicit UI authorization. Tests inject a fixture-only mover.
+    /// Called after explicit UI authorization (including the Home quick-clean button). Tests inject a fixture-only mover.
     public static func perform(files: [FileRecord], roots: [String], exclusions: [String], duplicateGroups: [DuplicateGroup] = [], journal: HistoryStore, recommendationsOnly: Bool = false, contextProvider: @Sendable () -> RecommendationContext = { .current() }, mover: (@Sendable (FileRecord) throws -> URL?)? = nil, progress: @Sendable (Int, Int) -> Void = { _, _ in }) async -> CleanupReport {
         var report = CleanupReport(); report.measuredRoot = roots.first ?? NSHomeDirectory()
         report.freeBefore = freeBytes(at: report.measuredRoot)
         let selectedPaths = Set(files.map(\.path))
         do {
-            guard !files.isEmpty, selectedPaths.count == files.count else { throw GuardianError.unsafe("Selección vacía o repetida") }
+            guard selectedPaths.count == files.count else { throw GuardianError.unsafe("Selección repetida") }
             try Safety.validateKeepers(selectedPaths: selectedPaths, duplicateGroups: duplicateGroups)
             try journal.append(HistoryEvent(action: "Limpieza autorizada", detail: "\(files.count) archivos; alcance: \(roots.joined(separator: ", ")); solo recomendaciones: \(recommendationsOnly). Detalle por archivo en el registro de acciones."))
             var context: RecommendationContext?

@@ -29,6 +29,6 @@ let card = png(1280, 640) {
         NSBezierPath(roundedRect:NSRect(x:x,y:143,width:width,height:43),xRadius:21,yRadius:21).fill()
         (label as NSString).draw(at:NSPoint(x:x+22,y:155),withAttributes:[.font:NSFont.systemFont(ofSize:16,weight:.medium),.foregroundColor:NSColor(calibratedRed:0.80,green:0.91,blue:0.90,alpha:1)])
     }
-    ("PRELIMINAR 0.2.0  ·  github.com/popcodex/MacGuardian" as NSString).draw(at:NSPoint(x:340,y:80),withAttributes:[.font:NSFont.systemFont(ofSize:16),.foregroundColor:NSColor(calibratedRed:0.48,green:0.61,blue:0.68,alpha:1)])
+    ("PRELIMINAR 0.2.1  ·  github.com/popcodex/MacGuardian" as NSString).draw(at:NSPoint(x:340,y:80),withAttributes:[.font:NSFont.systemFont(ofSize:16),.foregroundColor:NSColor(calibratedRed:0.48,green:0.61,blue:0.68,alpha:1)])
 }
 try card.write(to:output)

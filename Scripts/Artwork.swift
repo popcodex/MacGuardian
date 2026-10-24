@@ -33,6 +33,6 @@ let bg=png(790,528) {
     NSBezierPath(roundedRect:NSRect(x:478,y:155,width:136,height:27),xRadius:8,yRadius:8).fill()
     NSBezierPath(roundedRect:NSRect(x:624,y:42,width:112,height:26),xRadius:7,yRadius:7).fill()
     ("Local · Privado · Sin suscripciones" as NSString).draw(at:NSPoint(x:240,y:70),withAttributes:[.font:NSFont.systemFont(ofSize:15),.foregroundColor:NSColor.lightGray])
-    ("Edición personal 0.2.0 · Apple Silicon · macOS 14 o posterior" as NSString).draw(at:NSPoint(x:195,y:35),withAttributes:[.font:NSFont.systemFont(ofSize:12),.foregroundColor:NSColor.gray])
+    ("Edición personal 0.2.1 · Apple Silicon · macOS 14 o posterior" as NSString).draw(at:NSPoint(x:195,y:35),withAttributes:[.font:NSFont.systemFont(ofSize:12),.foregroundColor:NSColor.gray])
 }
 try bg.write(to:root.appendingPathComponent("InstallerBackground.png"))

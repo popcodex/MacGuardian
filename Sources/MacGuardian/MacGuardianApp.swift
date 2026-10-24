@@ -32,7 +32,14 @@ typealias ViewState<Value> = SwiftUI.State<Value>
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1180, height: 790), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
         window.title = "MacGuardian"
         window.minSize = NSSize(width: 1000, height: 680)
-        window.contentView = NSHostingView(rootView: WindowRoot().environmentObject(model))
+        // Keep all app content inside the opaque content rectangle. No automatic sidebar toolbar.
+        window.titlebarAppearsTransparent = false
+        window.titlebarSeparatorStyle = .none
+        window.toolbar = nil
+        let hosting = NSHostingView(rootView: WindowRoot().environmentObject(model))
+        hosting.safeAreaRegions = []
+        window.contentView = hosting
+        window.toolbar = nil
         window.center(); window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
         model.$showMenu.sink { [weak self] enabled in self?.updateMenu(enabled: enabled) }.store(in: &subscriptions)
         model.$metrics.sink { [weak self] _ in if self?.statusItem != nil { self?.updateMenu(enabled: true) } }.store(in: &subscriptions)
@@ -78,9 +85,19 @@ struct MainView: View {
         HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 22) {
                 HStack(spacing: 10) { GuardianLogo(); VStack(alignment: .leading) { Text("MacGuardian").font(.headline); Text("ESPACIO PARA LO IMPORTANTE").font(.system(size: 8, weight: .semibold)).tracking(1).foregroundStyle(.secondary) } }.padding(.horizontal, 12).padding(.top, 22)
-                List(Section.allCases, id: \.self, selection: $section) { item in Label(item.rawValue, systemImage: item.symbol).padding(.vertical, 4).tag(item) }.listStyle(.sidebar)
-                VStack(alignment: .leading, spacing: 7) { Label("Local y privado", systemImage: "lock.shield").foregroundStyle(Color.mint); Text("Sin cuentas · Sin telemetría").font(.caption).foregroundStyle(.secondary); Text("v0.2.0 · Edición personal").font(.caption2).foregroundStyle(.tertiary) }.padding(18)
-            }.frame(width: 235)
+                ScrollView {
+                    VStack(spacing: 4) {
+                        ForEach(Section.allCases, id: \.self) { item in
+                            Button { section = item } label: {
+                                Label(item.rawValue, systemImage: item.symbol)
+                                    .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 12).padding(.vertical, 10)
+                                    .background(section == item ? Color.primary.opacity(0.12) : .clear, in: RoundedRectangle(cornerRadius: 9))
+                            }.buttonStyle(.plain)
+                        }
+                    }.padding(.horizontal, 10)
+                }
+                VStack(alignment: .leading, spacing: 7) { Label("Local y privado", systemImage: "lock.shield").foregroundStyle(Color.mint); Text("Sin cuentas · Sin telemetría").font(.caption).foregroundStyle(.secondary); Text("v0.2.1 · Edición personal").font(.caption2).foregroundStyle(.tertiary) }.padding(18)
+            }.frame(width: 235).background(Color(nsColor: .windowBackgroundColor))
             Divider()
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top) {
@@ -97,7 +114,6 @@ struct MainView: View {
         }.tint(.mint)
         .alert("MacGuardian", isPresented: Binding(get: { m.error != nil }, set: { if !$0 { m.error = nil } })) { Button("Entendido") { m.error = nil } } message: { Text(m.error ?? "") }
         .sheet(isPresented: $review) { ReviewSheet().environmentObject(m) }
-        .sheet(item: $m.quickPlan) { QuickCleanSheet(plan: $0).environmentObject(m) }
         .sheet(item: $m.cleanupSummary) { CleanupSummarySheet(report: $0) }
         .onChange(of: section) { _, _ in search = "" }
     }
@@ -131,16 +147,20 @@ struct HomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Card {
+                    Label("Limpieza rápida", systemImage: "sparkles").font(.title2.bold())
+                    Text("Un clic: busca archivos basura recomendados y los mueve a la Papelera automáticamente. No tienes que seleccionar archivos ni abrir otra pantalla.").foregroundStyle(.secondary)
+                    Button { m.runQuickCleanup() } label: {
+                        Label(m.busy ? "Limpieza en curso…" : "LIMPIEZA RÁPIDA", systemImage: "sparkles")
+                            .font(.headline).frame(maxWidth: .infinity).padding(.vertical, 12)
+                    }.buttonStyle(.borderedProminent).tint(.teal).disabled(m.busy)
+                    Text("Al pulsar autorizas mover únicamente cachés regenerables reconocidas e informes antiguos recomendados. Conserva documentos, omite herramientas activas y no vacía la Papelera. Al terminar verás el resumen.").font(.caption).foregroundStyle(.secondary)
+                }
+                Card {
                     HStack(spacing: 24) {
                         GuardianLogo(size: 80)
                         VStack(alignment: .leading, spacing: 10) { Text("Cuida lo que importa.").font(.system(size: 28, weight: .semibold, design: .rounded)); Text("Descubre qué ocupa espacio y toma decisiones con contexto.\nCada análisis es de solo lectura.").foregroundStyle(.secondary); Button("ANALIZAR MI MAC") { m.chooseFolder() }.buttonStyle(.borderedProminent).tint(.teal).disabled(m.busy) }
                         Spacer()
                     }.padding(.vertical, 12)
-                }
-                Card {
-                    HStack { Label("Limpieza rápida recomendada", systemImage: "sparkles").font(.headline); Spacer(); Button("Preparar limpieza rápida") { m.prepareQuickCleanup() }.buttonStyle(.borderedProminent).tint(.teal).disabled(m.busy) }
-                    Text("Analiza cachés regenerables e informes de fallos antiguos y elige por ti los archivos antiguos compatibles. Una sola autorización; sin seleccionar uno por uno. No borra documentos ni cambia servicios.").foregroundStyle(.secondary)
-                    Text("Mueve a Papelera y muestra el resultado y la variación real del espacio disponible. No vacía la Papelera ni promete acelerar macOS.").font(.caption).foregroundStyle(.secondary)
                 }
                 HStack(spacing: 16) { MetricCard(label: "Almacenamiento disponible", value: sizeText(m.metrics.available), symbol: "internaldrive", detail: "De \(sizeText(m.metrics.capacity)) · volumen de usuario"); MetricCard(label: "CPU ocupada", value: m.metrics.cpuBusy.map { String(format: "%.1f %%", $0) } ?? "Midiendo…", symbol: "cpu", detail: "Diferencia de ticks entre muestras"); MetricCard(label: "Memoria", value: sizeText(m.metrics.usedMemory), symbol: "memorychip", detail: "Activa + cableada + comprimida") }
                 Card {
@@ -255,30 +275,15 @@ struct ReviewSheet: View {
         }
     }
 }
-struct QuickCleanSheet: View {
-    @EnvironmentObject var m: AppModel
-    @Environment(\.dismiss) var dismiss
-    let plan: QuickCleanPlan
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Label("Limpieza rápida recomendada", systemImage: "checkmark.shield").font(.title2.bold())
-            Text("MacGuardian ya eligió los candidatos. No necesitas marcarlos uno por uno.")
-            Text("\(plan.files.count) archivos · \(sizeText(plan.logical)) lógicos · \(plan.examined) entradas examinadas").font(.headline)
-            Text("Solo cachés regenerables reconocidas e informes de fallos antiguos. Se omiten las cachés de herramientas detectadas en ejecución. Se revalida antes de actuar. No se vacía la Papelera ni se borran documentos.").font(.callout).foregroundStyle(.secondary)
-            if plan.files.isEmpty { ContentUnavailableView("Nada que recomendar con seguridad", systemImage: "checkmark.shield", description: Text("Los archivos recientes, protegidos o de herramientas activas se han conservado.")) }
-            else { List(Array(plan.files.prefix(1000))) { file in VStack(alignment: .leading, spacing: 4) { HStack { Text(file.url.lastPathComponent).bold(); Spacer(); Text(sizeText(file.size)) }; Text(file.path).font(.caption).textSelection(.enabled) } } }
-            if !plan.issues.isEmpty { DisclosureGroup("Cobertura e incidencias (\(plan.issues.count))") { ScrollView { Text(plan.issues.joined(separator: "\n")).font(.caption).textSelection(.enabled) }.frame(maxHeight: 100) } }
-            Text("El tamaño lógico no equivale a espacio liberado. El resumen medirá el disponible antes y después; otros procesos también pueden cambiarlo.").font(.caption).foregroundStyle(.secondary)
-            HStack { Button("Cancelar") { dismiss() }; Spacer(); Button("Autorizar limpieza recomendada") { m.executeQuick(plan) }.buttonStyle(.borderedProminent).tint(.teal).disabled(plan.files.isEmpty || m.busy) }
-        }.padding(26).frame(width: 780, height: 580)
-    }
-}
 struct CleanupSummarySheet: View {
     @Environment(\.dismiss) var dismiss
     let report: CleanupReport
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Label(report.cancelled ? "Limpieza cancelada: resultado parcial" : "Resumen de limpieza", systemImage: "checkmark.circle").font(.title2.bold())
+            if report.moved.isEmpty && report.failures.isEmpty && !report.cancelled {
+                Text("No se encontraron archivos basura que cumplan las reglas de limpieza segura. No se modificó ningún archivo.").foregroundStyle(.secondary)
+            }
             HStack { MetricCard(label: "Archivos en Papelera", value: String(report.moved.count), symbol: "trash", detail: "No se borraron permanentemente"); MetricCard(label: "Tamaño lógico movido", value: sizeText(report.logicalMoved), symbol: "doc.on.doc", detail: "No equivale a espacio liberado") }
             LabeledContent("Disponible antes", value: report.freeBefore.map(sizeText) ?? "No medido")
             LabeledContent("Disponible después", value: report.freeAfter.map(sizeText) ?? "No medido")

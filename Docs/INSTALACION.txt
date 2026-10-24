@@ -1,4 +1,4 @@
-MacGuardian 0.2.0 · Edición personal para Apple Silicon
+MacGuardian 0.2.1 · Edición personal para Apple Silicon
 
 1. Arrastra MacGuardian.app al enlace Aplicaciones.
 2. Expulsa este disco y abre MacGuardian desde Aplicaciones.
@@ -26,3 +26,5 @@ Esta primera versión funcional no cubre todavía todo el prompt maestro:
 - No garantiza compatibilidad con versiones de macOS no probadas.
 
 Consulta README.md, SECURITY.md, TESTING.md y ROADMAP.md en el proyecto.
+
+LIMPIEZA RÁPIDA: en Inicio, el botón analiza, selecciona y mueve los recomendados automáticamente a Papelera. Su pulsación autoriza esa operación. Al terminar aparece el resumen. No vacía la Papelera.

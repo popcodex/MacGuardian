@@ -30,7 +30,6 @@ import MacGuardianCore
     @Published var associated: [AssociatedFile] = []
     @Published var appSize: Int64?
     @Published var appSizePartial = false
-    @Published var quickPlan: QuickCleanPlan?
     @Published var cleanupSummary: CleanupReport?
     @Published var showMenu = UserDefaults.standard.bool(forKey: "showMenu")
     @Published var interval = max(3, UserDefaults.standard.double(forKey: "interval"))
@@ -148,7 +147,7 @@ import MacGuardianCore
         if p.runModal() == .OK, let url = p.url { exclusions.append(Safety.lexicalPath(url.path)); UserDefaults.standard.set(exclusions, forKey: "exclusions"); selected = [] }
     }
     func removeExclusion(_ path: String) { guard !busy else { return }; exclusions.removeAll { $0 == path }; UserDefaults.standard.set(exclusions, forKey: "exclusions") }
-    func prepareQuickCleanup() {
+    func runQuickCleanup() {
         guard !busy else { return }; begin("Analizando cachés regenerables conocidas…")
         let exclusions = exclusions
         operation = Task { [self] in
@@ -174,7 +173,7 @@ import MacGuardianCore
             let plan = await withTaskCancellationHandler { await worker.value } onCancel: { worker.cancel() }
             busy = false
             if Task.isCancelled { status = "Limpieza rápida cancelada antes de modificar archivos."; return }
-            quickPlan = plan; status = "Recomendación preparada: \(plan.files.count) archivos. No se ha modificado nada."
+            executeCleanup(files: plan.files, roots: plan.roots, recommended: true)
         }
     }
     func trashSelection() {
@@ -184,7 +183,6 @@ import MacGuardianCore
         let files = paths.compactMap { map[$0] }
         executeCleanup(files: files, roots: scan.scopeRoots, recommended: false)
     }
-    func executeQuick(_ plan: QuickCleanPlan) { quickPlan = nil; executeCleanup(files: plan.files, roots: plan.roots, recommended: true) }
     private func executeCleanup(files: [FileRecord], roots: [String], recommended: Bool) {
         guard !busy, let store else { error = "Historial no disponible o hay una operación en curso."; return }
         begin("Moviendo únicamente los archivos autorizados a la Papelera…"); progressKind = "archivos procesados"; hashTotal = files.count

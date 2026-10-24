@@ -15,6 +15,35 @@ import Darwin
         return try FileRecord.read(url)
     }
     func context(active: [String] = [], available: Bool = true) -> RecommendationContext { RecommendationContext(home: root.path, processSnapshotAvailable: available, runningExecutables: active) }
+    @Test func quickCleanupWithNoCandidatesIsSuccessfulAndDoesNotMoveAnything() async throws {
+        let journal = try HistoryStore(url: root.appendingPathComponent("history.json"))
+        let report = await CleanupEngine.perform(files: [], roots: [root.path], exclusions: [], journal: journal, recommendationsOnly: true, mover: { _ in throw GuardianError.unsafe("No debe ejecutarse") })
+        #expect(report.moved.isEmpty)
+        #expect(report.failures.isEmpty)
+        #expect(report.freeBefore != nil)
+        #expect(report.freeAfter != nil)
+    }
+    @Test func automaticQuickPipelineSelectsOnlyOldKnownGarbageWithoutManualSelection() async throws {
+        let oldCache = try file("Library/Caches/pip/old.whl", old: true)
+        let recent = try file("Library/Caches/pip/recent.whl")
+        let personal = try file("Documents/personal.txt", old: true)
+        var files: [FileRecord] = []
+        let roots = RecommendationPolicy.quickRoots(home: root.path).filter { FileManager.default.fileExists(atPath: $0.path) }
+        for scope in roots { files += await Scanner.scan(root: scope).files }
+        let selected = try RecommendationPolicy.select(files: files, query: FileQuery(), roots: roots.map(\.path), exclusions: [], recommendedOnly: true, context: context())
+        #expect(selected == [oldCache.path])
+        let journal = try HistoryStore(url: root.appendingPathComponent("history.json"))
+        let trash = root.appendingPathComponent("fixture-trash"); try FileManager.default.createDirectory(at: trash, withIntermediateDirectories: true)
+        let home = root.path
+        let report = await CleanupEngine.perform(files: files.filter { selected.contains($0.path) }, roots: roots.map(\.path), exclusions: [], journal: journal, recommendationsOnly: true, contextProvider: { RecommendationContext(home: home, processSnapshotAvailable: true, runningExecutables: []) }, mover: { record in
+            let destination = trash.appendingPathComponent(record.url.lastPathComponent)
+            try FileManager.default.moveItem(at: record.url, to: destination); return destination
+        })
+        #expect(report.moved == [oldCache.path])
+        #expect(report.failures.isEmpty)
+        #expect(FileManager.default.fileExists(atPath: recent.path))
+        #expect(FileManager.default.fileExists(atPath: personal.path))
+    }
     @Test func processParserPreservesAbsolutePathsWithPaddingAndSpaces() throws {
         let rows = ProcessService.parse("  99   1  501 fixture  1.5  1024  00:12 S     /Applications/Example App.app/Contents/MacOS/Example App\n")
         #expect(rows.count == 1)

@@ -1,5 +1,11 @@
 # Verificación — 24 de octubre de 2026
 
+## Versión 0.2.1
+
+- 29 pruebas automatizadas: las 27 anteriores y dos casos nuevos. Una secuencia completa sin selección manual escanea raíces conocidas de prueba, selecciona automáticamente una caché antigua y la mueve con un ejecutor limitado al fixture; conserva caché reciente y documento personal. Un plan vacío devuelve resumen exitoso sin mover nada.
+- Release arm64 abierta con interfaz nativa. El botón LIMPIEZA RÁPIDA aparece como primera acción de Inicio. Se verificó visualmente Limpieza con cabecera completa y sin barra superpuesta.
+- No se ejecutó el botón contra los archivos reales del usuario durante la verificación.
+
 ## Versión 0.2.0
 
 - **27 pruebas aprobadas, 0 fallos**, conjunto local en 1.698 s. Incluyen recomendaciones conservadoras, selección masiva, cancelación, auditoría, cambios concurrentes y protección de aplicaciones activas.

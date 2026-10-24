@@ -8,9 +8,9 @@ Este directorio contiene información revisada para publicación:
 
 Los registros de ejecución detallados permanecen fuera del repositorio público y no se incluyen en el ZIP del proyecto. Los resultados resumidos no afirman pruebas que no se hayan realizado.
 
-## Resultados locales de 0.2.0
+## Resultados locales de 0.2.1
 
-- 27 pruebas automatizadas del núcleo aprobadas.
+- 29 pruebas automatizadas del núcleo aprobadas.
 - Compilación Release arm64 y comprobación de firma ad hoc.
 - Apertura de la aplicación exacta contenida en el DMG.
 - Coincidencia de los cinco archivos del paquete con el archivo firmado.

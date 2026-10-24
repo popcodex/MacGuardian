@@ -12,11 +12,11 @@
   <img alt="Swift 6.4" src="https://img.shields.io/badge/Swift-6.4-F05138?logo=swift&logoColor=white">
   <img alt="Apple Silicon" src="https://img.shields.io/badge/Apple_Silicon-arm64-29B8AC?logo=apple&logoColor=white">
   <img alt="Objetivo mínimo macOS 14" src="https://img.shields.io/badge/macOS-14%2B-3977D5?logo=apple&logoColor=white">
-  <img alt="Versión preliminar 0.2.0" src="https://img.shields.io/badge/estado-preliminar-E8AD4B">
+  <img alt="Versión preliminar 0.2.1" src="https://img.shields.io/badge/estado-preliminar-E8AD4B">
 </p>
 
 <p align="center">
-  <a href="https://github.com/popcodex/MacGuardian/releases/tag/v0.2.0"><strong>Descargar MacGuardian</strong></a> ·
+  <a href="https://github.com/popcodex/MacGuardian/releases/tag/v0.2.1"><strong>Descargar MacGuardian</strong></a> ·
   <a href="#capturas">Capturas</a> ·
   <a href="#instalación">Instalación</a> ·
   <a href="TESTING.md">Verificación</a> ·
@@ -32,13 +32,13 @@ MacGuardian reúne análisis de almacenamiento, revisión de archivos, duplicado
 La prioridad es **seguridad → fiabilidad → funcionalidad → rendimiento → diseño**. Los análisis son de solo lectura; las modificaciones son acciones independientes que necesitan tu autorización. No hay limpiezas ocultas, puntuaciones inventadas ni promesas de acelerar mágicamente macOS.
 
 > [!IMPORTANT]
-> **0.2.0 es una primera versión funcional, no el producto completo.** El código y el instalador se publican como una versión preliminar. La compilación es arm64, tiene firma ad hoc y **no está notarizada**; la evaluación de Gatekeeper devuelve rechazo. Se comprobó su apertura local en el Mac de desarrollo. Revisa [los límites actuales](#estado-y-limitaciones) antes de utilizarla.
+> **0.2.1 es una primera versión funcional, no el producto completo.** El código y el instalador se publican como una versión preliminar. La compilación es arm64, tiene firma ad hoc y **no está notarizada**; la evaluación de Gatekeeper devuelve rechazo. Se comprobó su apertura local en el Mac de desarrollo. Revisa [los límites actuales](#estado-y-limitaciones) antes de utilizarla.
 
 ## Capturas
 
 ### Un panel para entender tu equipo
 
-![Panel de inicio de MacGuardian en modo oscuro](Docs/media/inicio-v020.png)
+![Panel de inicio de MacGuardian en modo oscuro](Docs/media/inicio-v021.png)
 
 ### Explora el almacenamiento con contexto
 
@@ -57,10 +57,14 @@ Las imágenes son capturas reales de la versión publicada. Las pantallas de arc
 
 ![Resumen real de una limpieza de un archivo sintético](Docs/media/resumen-v020.png)
 
-## Novedades de 0.2.0
+## Novedades de 0.2.1
+
+- **LIMPIEZA RÁPIDA** es la primera acción de Inicio: analiza, selecciona y mueve automáticamente los recomendados, y muestra el resumen sin pedir otra selección.
+- Cabecera opaca y navegación sin barra lateral nativa que pueda añadir una superposición sobre el contenido.
+
 
 - Botones **Seleccionar todos** y **Seleccionar recomendados** en Limpieza y Almacenamiento.
-- Limpieza rápida desde Inicio: propuesta automática, autorización única y resumen de movimientos, errores y variación observada del espacio libre.
+- Limpieza rápida desde Inicio: selección y ejecución automáticas al pulsar el botón y resumen de movimientos, errores y variación observada del espacio libre.
 - Índice y filtros preparados en segundo plano para mantener la interfaz disponible.
 - Inventario ampliado de aplicaciones, carpetas adicionales y cierre forzado previo a desinstalar, con confirmación.
 - Iconos en Procesos, Inicio automático y Desarrollo.
@@ -87,7 +91,7 @@ Las recomendaciones excluyen documentos personales e instaladores y requieren an
 
 **Requisitos:** Mac con Apple Silicon. Objetivo mínimo macOS 14; ejecución validada únicamente en **macOS 27.0.1, Apple M2**. La compatibilidad con otras versiones sigue pendiente de prueba.
 
-1. Descarga **[MacGuardian.dmg de la versión 0.2.0](https://github.com/popcodex/MacGuardian/releases/download/v0.2.0/MacGuardian.dmg)**.
+1. Descarga **[MacGuardian.dmg de la versión 0.2.1](https://github.com/popcodex/MacGuardian/releases/download/v0.2.1/MacGuardian.dmg)**.
 2. Abre el DMG y arrastra **MacGuardian** al enlace **Aplicaciones**.
 3. Expulsa el disco y abre la aplicación desde Aplicaciones.
 4. Elige una carpeta para realizar el primer análisis de solo lectura.
@@ -105,8 +109,8 @@ La versión descargable incluye el instalador, el paquete de aplicación archiva
 
 1. **Autoriza el alcance.** Selecciona una carpeta, Descargas o una unidad externa. El análisis respeta permisos y exclusiones.
 2. **Comprende los resultados.** Consulta rutas, tamaños y motivos. Que un archivo sea antiguo o una caché no significa que sea prescindible.
-3. **Revisa la selección.** Puedes seleccionar todos los elegibles o pedir una selección recomendada. La limpieza rápida prepara automáticamente una propuesta conservadora. Los datos protegidos no están disponibles para la limpieza.
-4. **Decide por separado.** El movimiento a Papelera exige autorización: revisión de la selección manual o confirmación única del plan rápido. La aplicación no vacía la Papelera.
+3. **Revisa la selección.** Puedes seleccionar todos los elegibles o pedir una selección recomendada. El botón de limpieza rápida selecciona y mueve automáticamente los candidatos conservadores; no abre una selección manual. Los datos protegidos no están disponibles para la limpieza.
+4. **Decide por separado.** El movimiento a Papelera exige autorización: revisión de la selección manual o pulsación del botón LIMPIEZA RÁPIDA, que autoriza esa operación. La aplicación no vacía la Papelera.
 5. **Conserva una copia.** En duplicados, se bloquea una selección que no deje una copia verificable.
 
 Para recuperar un archivo que siga en Papelera: **Finder → Papelera → seleccionar → Sacar de la papelera**. Las posibilidades de recuperación dependen del volumen y de que el elemento permanezca allí.
@@ -121,7 +125,7 @@ Para recuperar un archivo que siga en Papelera: **Finder → Papelera → selecc
 
 ## Estado y limitaciones
 
-**Verificado localmente:** compilación Release arm64, apertura de la aplicación incluida en el DMG, firma ad hoc e integridad del paquete, 27 pruebas del núcleo y comprobaciones visuales. Consulta [TESTING.md](TESTING.md) y [las evidencias publicadas](Docs/verification/).
+**Verificado localmente:** compilación Release arm64, apertura de la aplicación incluida en el DMG, firma ad hoc e integridad del paquete, 29 pruebas del núcleo y comprobaciones visuales. Consulta [TESTING.md](TESTING.md) y [las evidencias publicadas](Docs/verification/).
 
 **Pendiente o limitado:**
 
@@ -167,7 +171,7 @@ python3 -m pip install --target .build/packaging --only-binary=:all: \
 
 **Entorno validado:** Swift 6.4 y Command Line Tools con SDK de macOS 27. La compilación con otras combinaciones de herramientas debe verificarse. Los scripts redirigen sus cachés al proyecto.
 
-La aplicación se firma en una carpeta temporal fuera de iCloud y se archiva como `dist/MacGuardian-app.zip` antes de incorporarla al DMG en `dist/v0.2.0/`. Esto evita que File Provider añada metadatos al paquete firmado. Las bibliotecas MIT `ds-store` y `mac-alias` se utilizan únicamente para generar el diseño del instalador; no se incluyen en la aplicación. Consulta [THIRD_PARTY.md](THIRD_PARTY.md).
+La aplicación se firma en una carpeta temporal fuera de iCloud y se archiva como `dist/MacGuardian-app.zip` antes de incorporarla al DMG en `dist/v0.2.1/`. Esto evita que File Provider añada metadatos al paquete firmado. Las bibliotecas MIT `ds-store` y `mac-alias` se utilizan únicamente para generar el diseño del instalador; no se incluyen en la aplicación. Consulta [THIRD_PARTY.md](THIRD_PARTY.md).
 
 Para una distribución con identidad válida, establece `MACGUARDIAN_SIGN_IDENTITY` al construir y sigue el proceso oficial de notarización con tus propias credenciales. El repositorio no contiene credenciales de firma.
 
@@ -203,5 +207,5 @@ Docs/
 <p align="center">
   <img src="Resources/Logo.svg" alt="Logotipo original de MacGuardian" width="48"><br>
   <strong>Espacio para lo importante.</strong><br>
-  Proyecto personal de <a href="https://github.com/popcodex">popcodex</a> · Versión preliminar 0.2.0
+  Proyecto personal de <a href="https://github.com/popcodex">popcodex</a> · Versión preliminar 0.2.1
 </p>
