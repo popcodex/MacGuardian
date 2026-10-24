@@ -1,0 +1,29 @@
+name: Comunicar un problema
+description: Informa un fallo reproducible sin adjuntar datos personales.
+title: "[Problema]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Utiliza archivos sintéticos. No publiques credenciales, rutas privadas, documentos personales ni listados de procesos. Los problemas de seguridad deben comunicarse mediante un reporte privado.
+  - type: input
+    id: environment
+    attributes:
+      label: Entorno
+      description: Versión de macOS, arquitectura y versión de MacGuardian.
+      placeholder: macOS … · Apple Silicon · MacGuardian 0.1.0
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Pasos para reproducir
+      description: Indica los pasos y los archivos sintéticos necesarios.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Resultado esperado y observado
+    validations:
+      required: true

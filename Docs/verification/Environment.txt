@@ -1,0 +1,11 @@
+Observado el 24 de octubre de 2026, zona America/Santo_Domingo.
+macOS 27.0.1 (26A434), arm64, Mac14,7, Apple M2, 16 GiB físicos.
+Command Line Tools: /Library/Developer/CommandLineTools
+Swift: Apple Swift 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)
+Xcode completo: no disponible mediante la selección activa.
+Identidades de firma válidas: 0.
+Firma de la aplicación: ad hoc + hardened runtime; recursos sellados.
+Gatekeeper spctl --assess: rejected, código 3; sin Developer ID/notarización.
+La aplicación se abrió localmente y se probó con interfaz nativa.
+Huella física puntual en reposo (sample, 1 s): 32.6 MB; pico 32.9 MB.
+El muestreo no constituye un límite de memoria ni un benchmark de todo el disco.

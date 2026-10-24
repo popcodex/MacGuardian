@@ -1,0 +1,15 @@
+{
+  "version": "0.1.0",
+  "architecture": "arm64",
+  "filesMatchSignedArchive": true,
+  "applicationFiles": {
+    "MacGuardian.app/Contents/Info.plist": "ba56d9ea6df0547fe77ac7012bd08b656ef09e2fe6d8cfdc5a16b557f298e1c5",
+    "MacGuardian.app/Contents/PkgInfo": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
+    "MacGuardian.app/Contents/_CodeSignature/CodeResources": "c98900093edecbd0d79f8859e09fff49a70cfb547eacd7b7711a4fe45171693a",
+    "MacGuardian.app/Contents/MacOS/MacGuardian": "de0018f74e646cf175bc480825ccc0b5161cc0f42a94c8f561b670ef8fb071e9",
+    "MacGuardian.app/Contents/Resources/MacGuardian.icns": "26ed4e1f6739ead62804cdfa523dd27f0df92958bf0e4b04831f15b7b68d24bf"
+  },
+  "applicationsLink": "/Applications",
+  "backgroundMatches": true,
+  "dmgSHA256": "cdefb8b432286ac102504b8ef972f1a8efc5deb3ceeb7e29dfa52387ebc9b6b0"
+}

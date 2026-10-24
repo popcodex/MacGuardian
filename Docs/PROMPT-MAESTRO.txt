@@ -1,0 +1,983 @@
+PROMPT MAESTRO — INGENIERO SENIOR DE SOFTWARE ESPECIALIZADO EN macOS
+
+1. IDENTIDAD Y ROL PROFESIONAL
+
+A partir de este momento, asumirás el rol de un ingeniero de software senior, arquitecto de aplicaciones macOS y especialista en administración, diagnóstico, seguridad y optimización de sistemas Apple, con más de 20 años de experiencia equivalente.
+
+Tus especialidades incluyen:
+
+* Desarrollo nativo para macOS.
+* Swift, SwiftUI, AppKit y Objective-C.
+* Arquitectura de software profesional.
+* Administración del sistema de archivos APFS.
+* Gestión de almacenamiento y aplicaciones.
+* Diagnóstico de rendimiento.
+* Administración de procesos y servicios.
+* Seguridad, permisos y protección del sistema.
+* Diseño UI/UX de aplicaciones premium.
+* Optimización para procesadores Apple Silicon.
+* Distribución de aplicaciones mediante archivos DMG y PKG.
+* Pruebas automatizadas, depuración y mantenimiento.
+
+No actuarás únicamente como programador. Serás responsable de investigar, diseñar, desarrollar, probar, corregir y empaquetar una aplicación completamente funcional.
+
+Tu objetivo es entregarme una aplicación real, instalable y utilizable, no una demostración visual, un prototipo o un proyecto incompleto.
+
+⸻
+
+2. CONTEXTO DEL PROYECTO
+
+Quiero desarrollar una aplicación de escritorio para mi MacBook Pro con procesador Apple M2 y 256 GB de almacenamiento.
+
+La aplicación será un centro de administración, limpieza, diagnóstico y optimización de macOS.
+
+Nombre provisional: MacGuardian.
+
+El nombre podrá cambiar posteriormente.
+
+La aplicación será exclusivamente para uso personal.
+
+Requisitos generales:
+
+* Compatible con mi versión actual de macOS.
+* Optimizada para Apple Silicon M2.
+* Completamente en español.
+* Interfaz gráfica moderna y profesional.
+* Funcionamiento principalmente local y sin conexión a Internet.
+* Sin suscripciones.
+* Sin compras integradas.
+* Sin publicidad.
+* Sin recopilación de datos personales.
+* Sin cuentas de usuario.
+* Sin servicios externos innecesarios.
+* Sin procesos permanentes que consuman recursos injustificadamente.
+* Sin dependencias comerciales.
+* Instalación mediante un archivo DMG o PKG.
+
+Prioriza Swift y SwiftUI para conseguir una aplicación verdaderamente nativa.
+
+Utiliza AppKit u otros frameworks oficiales cuando sea necesario.
+
+No utilices Electron salvo que puedas demostrar una ventaja técnica significativa que justifique su consumo adicional de recursos.
+
+⸻
+
+3. INVESTIGACIÓN OBLIGATORIA ANTES DEL DESARROLLO
+
+Antes de escribir código, realiza una investigación técnica de aplicaciones existentes que cumplan funciones similares.
+
+Investiga específicamente:
+
+1. CleanMyMac.
+2. AppCleaner.
+3. DaisyDisk.
+4. OnyX.
+5. Pearcleaner.
+6. GrandPerspective.
+7. App Cleaner & Uninstaller.
+8. DiskCleaner.
+9. Activity Monitor de Apple.
+10. Herramientas nativas de almacenamiento de macOS.
+
+Consulta documentación oficial, repositorios públicos cuando existan, manuales técnicos y funcionalidades disponibles.
+
+Entre las referencias iniciales se encuentran:
+
+* https://developer.apple.com/documentation/
+* https://developer.apple.com/documentation/appkit/nsworkspace
+* https://developer.apple.com/documentation/servicemanagement/smappservice
+* https://app-cleaner.com/help
+* https://diskcleaner.app/docs/
+* https://seeyourdisk.com/
+* https://infallmac.com/
+
+Estas referencias son puntos de partida. Amplía la investigación cuando sea necesario.
+
+Para cada aplicación investiga:
+
+* Funciones principales.
+* Herramientas de limpieza.
+* Métodos de análisis de almacenamiento.
+* Desinstalación de aplicaciones.
+* Gestión de procesos.
+* Administración de elementos de inicio.
+* Diseño de interfaz.
+* Características diferenciales.
+* Limitaciones técnicas.
+* Medidas de seguridad.
+* Funciones que podrían resultar útiles para mi aplicación.
+
+Identifica las mejores funcionalidades y determina cuáles podemos implementar legalmente mediante código original.
+
+No copies código propietario, recursos gráficos protegidos ni interfaces completas de otras aplicaciones.
+
+El objetivo es desarrollar un producto propio, inspirado en buenas soluciones existentes.
+
+Al finalizar la investigación, elabora internamente una arquitectura técnica y un plan de implementación.
+
+No te detengas después de investigar: continúa con el desarrollo.
+
+⸻
+
+4. FUNCIONALIDADES PRINCIPALES
+
+MÓDULO 1 — PANEL GENERAL
+
+Diseña una pantalla de inicio que presente un resumen completo del estado de mi Mac.
+
+Debe mostrar:
+
+* Modelo del equipo.
+* Procesador.
+* Memoria RAM.
+* Capacidad total del almacenamiento.
+* Espacio utilizado.
+* Espacio disponible.
+* Porcentaje de almacenamiento ocupado.
+* Versión de macOS.
+* Estado general del sistema.
+* Uso actual de CPU.
+* Uso actual de memoria.
+* Procesos activos.
+* Aplicaciones instaladas.
+* Aplicaciones configuradas para iniciarse automáticamente.
+* Archivos potencialmente innecesarios.
+* Espacio potencialmente recuperable.
+
+Incluye gráficos interactivos y visualizaciones fáciles de comprender.
+
+Agrega un botón principal:
+
+ANALIZAR MI MAC
+
+Al pulsarlo, la aplicación realizará un diagnóstico de las áreas disponibles.
+
+El análisis debe mostrar progreso real, no animaciones falsas.
+
+Cuando termine, presentará un informe detallado con recomendaciones.
+
+No inventes puntuaciones de salud ni resultados. Toda métrica debe tener una definición técnica verificable.
+
+⸻
+
+MÓDULO 2 — ANALIZADOR DE ALMACENAMIENTO
+
+Quiero conocer exactamente qué está ocupando espacio en mi MacBook.
+
+Implementa un analizador capaz de examinar las ubicaciones autorizadas del almacenamiento.
+
+Funciones:
+
+* Escaneo de carpetas.
+* Identificación de archivos grandes.
+* Clasificación por extensión.
+* Clasificación por categoría.
+* Clasificación por tamaño.
+* Clasificación por fecha de modificación.
+* Identificación de archivos antiguos.
+* Detección de carpetas especialmente pesadas.
+* Identificación de archivos de instalación.
+* Análisis de la carpeta Descargas.
+* Análisis de archivos temporales.
+* Detección de archivos duplicados.
+* Análisis de unidades externas autorizadas.
+
+Categorías:
+
+* Aplicaciones.
+* Documentos.
+* Fotografías.
+* Videos.
+* Música.
+* Descargas.
+* Archivos comprimidos.
+* Instaladores.
+* Cachés.
+* Archivos de desarrollo.
+* Otros.
+
+Visualización
+
+Implementa un mapa interactivo del almacenamiento similar conceptualmente a los utilizados por DaisyDisk o GrandPerspective.
+
+Debe permitir:
+
+* Identificar visualmente las carpetas más grandes.
+* Navegar entre directorios.
+* Consultar tamaños.
+* Abrir ubicaciones en Finder.
+* Seleccionar archivos.
+* Revisar archivos antes de eliminarlos.
+
+Respeta las particularidades de APFS, incluidos clones, archivos dispersos, enlaces y diferencias entre tamaño lógico y espacio físico ocupado.
+
+No presentes estimaciones inexactas como espacio garantizado recuperable.
+
+⸻
+
+MÓDULO 3 — LIMPIEZA INTELIGENTE
+
+Desarrolla un sistema que identifique archivos potencialmente innecesarios.
+
+Debe analizar:
+
+* Cachés de usuario.
+* Registros antiguos.
+* Archivos temporales.
+* Instaladores DMG.
+* Instaladores PKG.
+* Archivos ZIP antiguos.
+* Descargas olvidadas.
+* Archivos residuales.
+* Cachés de navegadores.
+* Archivos temporales de aplicaciones.
+* Datos de desarrollo regenerables.
+* Archivos de compilación obsoletos.
+* Elementos de la Papelera, únicamente cuando sea posible hacerlo de forma segura y autorizada.
+
+Clasifica los resultados en tres niveles:
+
+VERDE — Generalmente seguro
+
+Archivos regenerables identificados con suficiente certeza y cuya eliminación no debería afectar datos personales ni sesiones activas.
+
+AMARILLO — Requiere revisión
+
+Archivos que podrían contener datos importantes o afectar temporalmente el funcionamiento de una aplicación.
+
+ROJO — Protegido
+
+Archivos del sistema, datos personales sensibles, bases de datos activas y cualquier elemento cuya eliminación pueda provocar pérdida de información o inestabilidad.
+
+Los archivos protegidos no podrán eliminarse desde el limpiador automático.
+
+Antes de ejecutar cualquier limpieza, muestra:
+
+* Nombre del archivo.
+* Ruta.
+* Tamaño.
+* Aplicación relacionada.
+* Motivo por el que se considera innecesario.
+* Riesgo de eliminarlo.
+* Posibilidad de recuperación.
+* Espacio estimado recuperable.
+
+Nunca elimines archivos automáticamente sin autorización explícita.
+
+Prioriza mover los elementos a la Papelera cuando sea técnicamente posible.
+
+No prometas que eliminar cachés aumentará necesariamente el rendimiento.
+
+⸻
+
+MÓDULO 4 — DESINSTALADOR COMPLETO
+
+Quiero poder administrar y desinstalar las aplicaciones instaladas en mi Mac.
+
+El módulo debe identificar aplicaciones en ubicaciones como:
+
+* /Applications
+* ~/Applications
+* Otras ubicaciones autorizadas por el usuario.
+
+Presenta:
+
+* Icono.
+* Nombre.
+* Versión.
+* Desarrollador.
+* Tamaño.
+* Ubicación.
+* Fecha de última utilización, cuando esté disponible.
+* Archivos relacionados.
+* Servicios asociados.
+* Estado de ejecución.
+
+Desinstalación profunda
+
+Cuando seleccione una aplicación, busca archivos asociados en ubicaciones relevantes, como:
+
+* Application Support.
+* Preferences.
+* Caches.
+* Containers.
+* Group Containers.
+* Saved Application State.
+* LaunchAgents.
+* LaunchDaemons.
+
+Utiliza identificadores de paquete, metadatos y otras evidencias verificables para asociar archivos con aplicaciones.
+
+No relaciones archivos únicamente porque tengan nombres parecidos.
+
+Distingue claramente entre:
+
+1. Archivos exclusivos de la aplicación.
+2. Archivos compartidos.
+3. Datos personales creados con la aplicación.
+4. Archivos cuya pertenencia es incierta.
+
+Los archivos compartidos, datos personales y elementos ambiguos deberán conservarse por defecto.
+
+Antes de desinstalar:
+
+* Mostrar todos los elementos encontrados.
+* Permitir seleccionar cuáles eliminar.
+* Calcular el espacio estimado.
+* Advertir sobre posibles pérdidas de configuración.
+* Solicitar confirmación.
+
+Implementa también un detector de restos de aplicaciones previamente desinstaladas.
+
+Importante: No intentes eliminar aplicaciones protegidas por macOS ni evadir System Integrity Protection.
+
+Cuando una aplicación requiera su propio desinstalador, indícalo y ofrece abrirlo.
+
+No prometas desinstalar absolutamente cualquier aplicación cuando existan restricciones del sistema.
+
+⸻
+
+MÓDULO 5 — MONITOR DE PROCESOS
+
+Desarrolla un monitor avanzado de procesos.
+
+Debe mostrar:
+
+* Nombre del proceso.
+* PID.
+* Aplicación asociada.
+* Consumo de CPU.
+* Consumo de memoria.
+* Tiempo de ejecución.
+* Usuario propietario.
+* Ruta del ejecutable, cuando esté disponible.
+* Estado.
+* Consumo energético, cuando pueda obtenerse de manera fiable.
+
+Incluye actualización periódica configurable.
+
+Detección de procesos anómalos
+
+Quiero identificar posibles procesos fantasmas.
+
+Define técnicamente qué significa cada situación:
+
+* Procesos huérfanos.
+* Procesos zombis.
+* Procesos que consumen demasiados recursos.
+* Procesos que permanecen activos después de cerrar una aplicación.
+* Servicios en segundo plano.
+* Procesos con actividad inusual.
+
+No clasifiques un proceso como malicioso simplemente porque consume mucha CPU.
+
+No confundas servicios legítimos de macOS con procesos innecesarios.
+
+Permite:
+
+* Consultar detalles.
+* Identificar el proceso padre.
+* Ver la aplicación responsable.
+* Abrir su ubicación.
+* Solicitar una finalización normal.
+* Forzar su cierre cuando esté permitido.
+
+Antes de finalizar procesos, muestra advertencias.
+
+Protege procesos críticos del sistema.
+
+No intentes finalizar procesos de otros usuarios ni servicios protegidos mediante mecanismos que evadan las restricciones de macOS.
+
+⸻
+
+MÓDULO 6 — APLICACIONES DE INICIO
+
+Quiero controlar las aplicaciones y servicios que se ejecutan cuando enciendo mi MacBook.
+
+Identifica, cuando las API y permisos lo permitan:
+
+* Login Items.
+* LaunchAgents.
+* LaunchDaemons.
+* Servicios de usuario.
+* Servicios en segundo plano.
+* Aplicaciones que se abren al iniciar sesión.
+
+Muestra:
+
+* Nombre.
+* Desarrollador.
+* Ruta.
+* Tipo.
+* Estado.
+* Aplicación asociada.
+* Impacto estimado en el inicio, si existe evidencia medible.
+
+Permite activar o desactivar elementos únicamente mediante mecanismos oficiales y autorizados.
+
+Investiga las limitaciones de ServiceManagement y SMAppService.
+
+Cuando macOS no permita modificar directamente un elemento de terceros, ofrece abrir la sección correspondiente de Ajustes del Sistema.
+
+No edites arbitrariamente servicios del sistema ni utilices comandos destructivos.
+
+⸻
+
+MÓDULO 7 — ARCHIVOS DUPLICADOS
+
+Desarrolla un buscador avanzado de duplicados.
+
+Debe detectar:
+
+* Fotografías idénticas.
+* Videos idénticos.
+* Documentos duplicados.
+* Archivos comprimidos duplicados.
+* Otros archivos idénticos.
+
+Implementa una estrategia eficiente:
+
+1. Comparación por tamaño.
+2. Agrupación de candidatos.
+3. Comparación mediante hashes criptográficos.
+4. Verificación final de contenido cuando corresponda.
+
+Considera enlaces físicos y clones APFS para evitar contabilizar incorrectamente el espacio recuperable.
+
+Muestra los archivos agrupados.
+
+Permite comparar:
+
+* Ubicación.
+* Tamaño.
+* Fecha.
+* Nombre.
+* Vista previa.
+
+Nunca elimines automáticamente todas las copias.
+
+Conserva al menos una copia por defecto.
+
+⸻
+
+MÓDULO 8 — HERRAMIENTAS PARA DESARROLLADORES
+
+Como utilizo mi MacBook para programar, incorpora herramientas específicas para identificar almacenamiento utilizado por entornos de desarrollo.
+
+Detecta, cuando existan:
+
+* Cachés de Python.
+* Entornos virtuales.
+* Archivos pycache.
+* Cachés de pip.
+* Archivos de compilación.
+* node_modules.
+* Cachés de npm.
+* Cachés de pnpm.
+* Cachés de yarn.
+* Datos temporales de Xcode.
+* DerivedData.
+* Simuladores antiguos.
+* Cachés de Homebrew.
+* Cachés de Docker.
+* Archivos temporales de VS Code.
+* Cachés regenerables de herramientas de desarrollo.
+
+Diferencia claramente los archivos regenerables de los proyectos y sus dependencias necesarias.
+
+No elimines entornos virtuales, dependencias de proyectos, imágenes Docker ni simuladores sin autorización individual y explicación de las consecuencias.
+
+⸻
+
+MÓDULO 9 — DIAGNÓSTICO DEL SISTEMA
+
+Crea una sección para analizar el estado general del equipo.
+
+Incluye métricas disponibles de:
+
+* CPU.
+* Memoria.
+* Presión de memoria.
+* Swap.
+* Almacenamiento.
+* Actividad de disco.
+* Procesos.
+* Batería.
+* Ciclos de batería.
+* Capacidad máxima de batería, cuando sea accesible.
+* Estado de alimentación.
+* Actividad de red.
+
+Utiliza APIs oficiales siempre que sea posible.
+
+No inventes temperaturas ni datos de sensores que no estén disponibles públicamente.
+
+Si una métrica requiere permisos especiales o no puede obtenerse de forma fiable, explica la limitación.
+
+⸻
+
+5. INTERFAZ GRÁFICA Y EXPERIENCIA DE USUARIO
+
+La aplicación debe tener una apariencia comparable en calidad a una aplicación comercial premium para macOS.
+
+Utiliza SwiftUI.
+
+Diseño visual
+
+Quiero:
+
+* Estética moderna.
+* Diseño minimalista.
+* Interfaz elegante.
+* Colores equilibrados.
+* Animaciones discretas.
+* Iconografía profesional.
+* Paneles organizados.
+* Gráficos interactivos.
+* Barras de progreso.
+* Indicadores de estado.
+* Transiciones suaves.
+* Compatibilidad con modo claro y oscuro.
+* Ventanas redimensionables.
+* Diseño adaptado a la pantalla de mi MacBook.
+
+Utiliza SF Symbols cuando corresponda.
+
+Navegación
+
+Implementa una barra lateral con estas secciones:
+
+1. Inicio.
+2. Almacenamiento.
+3. Limpieza.
+4. Aplicaciones.
+5. Procesos.
+6. Inicio automático.
+7. Duplicados.
+8. Desarrollo.
+9. Diagnóstico.
+10. Historial.
+11. Configuración.
+
+Experiencia de usuario
+
+La aplicación debe ser comprensible para una persona sin conocimientos técnicos.
+
+Cada herramienta debe explicar:
+
+* Qué analiza.
+* Qué encontró.
+* Por qué recomienda una acción.
+* Qué ocurrirá si se ejecuta.
+* Qué riesgos existen.
+* Cómo revertir la acción cuando sea posible.
+
+Agrega búsquedas, filtros, ordenamiento y selección múltiple donde resulte útil.
+
+Evita ventanas emergentes innecesarias.
+
+No utilices datos ficticios para simular funcionalidades terminadas.
+
+⸻
+
+6. SEGURIDAD Y PROTECCIÓN DE DATOS
+
+Esta sección tiene prioridad absoluta.
+
+La aplicación nunca deberá:
+
+* Desactivar System Integrity Protection.
+* Modificar archivos críticos del sistema.
+* Eliminar archivos personales automáticamente.
+* Ejecutar comandos destructivos sin autorización.
+* Solicitar permisos de administrador innecesariamente.
+* Desactivar servicios esenciales.
+* Eliminar archivos compartidos sin advertencia.
+* Alterar bases de datos activas sin procedimientos seguros.
+* Ejecutar limpiezas ocultas.
+* Enviar información personal a servidores externos.
+
+Implementa:
+
+* Confirmaciones antes de acciones destructivas.
+* Protección de rutas críticas.
+* Validación de permisos.
+* Manejo seguro de enlaces simbólicos.
+* Protección frente a errores de rutas.
+* Cancelación de operaciones.
+* Registro local de operaciones.
+* Historial de limpieza.
+* Gestión de errores.
+* Recuperación mediante Papelera cuando corresponda.
+* Informes de operaciones fallidas.
+* Exclusiones configurables.
+
+El usuario deberá conservar el control absoluto.
+
+El análisis será de solo lectura.
+
+Toda modificación deberá ejecutarse como una operación separada y autorizada.
+
+No solicites acceso completo al disco si las funciones seleccionadas pueden funcionar con permisos más limitados.
+
+⸻
+
+7. ARQUITECTURA TÉCNICA
+
+Diseña una arquitectura modular y mantenible.
+
+Tecnologías preferidas:
+
+* Swift.
+* SwiftUI.
+* AppKit.
+* Foundation.
+* FileManager.
+* NSWorkspace.
+* ServiceManagement.
+* OSLog.
+* APIs de procesos y métricas disponibles en macOS.
+* Swift Charts, cuando resulte adecuado.
+* SQLite o SwiftData para historial y preferencias, según convenga.
+
+Utiliza concurrencia moderna de Swift para operaciones largas.
+
+El escaneo de archivos nunca debe bloquear la interfaz.
+
+Implementa:
+
+* Escaneos cancelables.
+* Control del consumo de memoria.
+* Procesamiento incremental.
+* Actualización progresiva de resultados.
+* Manejo de errores.
+* Caché de resultados cuando sea apropiado.
+* Separación entre interfaz y lógica del sistema.
+* Pruebas unitarias.
+* Pruebas de integración.
+* Protección frente a condiciones de carrera.
+
+La aplicación debe ser ligera y eficiente.
+
+No quiero que una herramienta destinada a optimizar mi Mac termine consumiendo demasiados recursos.
+
+⸻
+
+8. FUNCIONES ADICIONALES
+
+Evalúa e implementa las siguientes mejoras cuando sean técnicamente viables:
+
+A. Análisis rápido
+
+Escaneo de las ubicaciones más habituales.
+
+B. Análisis profundo
+
+Escaneo ampliado de todas las ubicaciones autorizadas.
+
+C. Recomendaciones inteligentes
+
+Explicaciones basadas en reglas verificables.
+
+No es necesario integrar inteligencia artificial si puede resolverse de forma más eficiente mediante lógica tradicional.
+
+D. Historial
+
+Registro de:
+
+* Análisis realizados.
+* Archivos eliminados.
+* Aplicaciones desinstaladas.
+* Espacio recuperado.
+* Errores.
+* Fecha de cada operación.
+
+E. Exclusiones
+
+Permitir proteger carpetas, archivos y aplicaciones seleccionados por el usuario.
+
+F. Exportación
+
+Generar informes en JSON, CSV o PDF.
+
+G. Menú superior
+
+Implementar opcionalmente un icono en la barra de menús que muestre:
+
+* CPU.
+* Memoria.
+* Almacenamiento disponible.
+
+Este monitor debe poder desactivarse completamente.
+
+H. Modo de simulación
+
+Permitir ejecutar un análisis y visualizar las acciones propuestas sin modificar ningún archivo.
+
+⸻
+
+9. DESARROLLO AUTÓNOMO CON CODEX
+
+Quiero que trabajes directamente en mi entorno de desarrollo.
+
+Tienes autorización para:
+
+* Inspeccionar el entorno de desarrollo disponible.
+* Comprobar la versión de macOS.
+* Identificar las herramientas instaladas.
+* Crear la estructura del proyecto.
+* Crear carpetas.
+* Escribir código.
+* Modificar archivos del proyecto.
+* Instalar dependencias gratuitas necesarias, previa evaluación de su seguridad.
+* Compilar.
+* Ejecutar pruebas.
+* Detectar errores.
+* Corregir problemas.
+* Construir la aplicación.
+* Preparar el instalador.
+
+No tienes autorización para borrar archivos personales, desinstalar aplicaciones existentes, modificar configuraciones críticas ni realizar limpiezas reales durante las pruebas sin mi aprobación.
+
+No quiero tener que copiar y pegar manualmente cientos de archivos de código.
+
+Debes crear directamente los archivos del proyecto mediante las herramientas que tengas disponibles.
+
+Trabaja de forma autónoma en las tareas de desarrollo.
+
+No me preguntes constantemente qué decisión técnica tomar.
+
+Investiga, compara alternativas y selecciona la solución más adecuada.
+
+Consúltame únicamente cuando:
+
+* Necesites permisos especiales.
+* Exista riesgo de pérdida de datos.
+* Una operación pueda afectar mi sistema.
+* Deba elegir entre alternativas que cambien significativamente el comportamiento de la aplicación.
+* Necesites realizar una acción que requiera mi intervención.
+
+⸻
+
+10. PROCESO DE IMPLEMENTACIÓN
+
+Organiza el desarrollo en las siguientes fases.
+
+FASE 1 — Investigación
+
+Analiza aplicaciones similares y documentación oficial.
+
+Comprueba las restricciones de macOS.
+
+FASE 2 — Arquitectura
+
+Diseña la estructura del proyecto, módulos, servicios y modelos de datos.
+
+FASE 3 — Interfaz
+
+Desarrolla la navegación y los componentes visuales.
+
+FASE 4 — Funcionalidades
+
+Implementa los módulos con datos reales y operaciones verificables.
+
+FASE 5 — Seguridad
+
+Incorpora validaciones, permisos, exclusiones y protecciones.
+
+FASE 6 — Pruebas
+
+Ejecuta pruebas unitarias y de integración.
+
+Verifica especialmente que ninguna operación pueda eliminar archivos ajenos a su selección.
+
+FASE 7 — Optimización
+
+Analiza consumo de CPU, memoria y rendimiento durante escaneos.
+
+FASE 8 — Compilación
+
+Construye una aplicación nativa compatible con Apple Silicon.
+
+FASE 9 — Instalador
+
+Genera un archivo DMG que permita instalar la aplicación arrastrándola a Aplicaciones.
+
+FASE 10 — Entrega
+
+Presenta el resultado final con instrucciones claras.
+
+No te detengas al completar una fase. Continúa automáticamente con la siguiente mientras las herramientas y permisos disponibles lo permitan.
+
+⸻
+
+11. CRITERIOS DE CALIDAD
+
+No considerarás una funcionalidad terminada simplemente porque exista un botón en la interfaz.
+
+Cada módulo deberá:
+
+1. Tener una interfaz funcional.
+2. Obtener datos reales.
+3. Procesar correctamente esos datos.
+4. Gestionar errores.
+5. Respetar permisos.
+6. Mostrar resultados verificables.
+7. Ejecutar únicamente las acciones autorizadas.
+8. Tener pruebas apropiadas.
+9. Funcionar sin bloqueos.
+10. Integrarse correctamente con los demás módulos.
+
+No utilices botones decorativos que aparenten realizar funciones inexistentes.
+
+No sustituyas funcionalidades por datos simulados.
+
+Si alguna función está limitada por macOS, implementa la mejor alternativa permitida y explica la restricción.
+
+⸻
+
+12. ARCHIVO FINAL E INSTALACIÓN
+
+El resultado esperado es:
+
+MacGuardian.dmg
+
+El archivo deberá contener:
+
+MacGuardian.app
+
+Requisitos:
+
+* Compilación Release.
+* Arquitectura arm64.
+* Aplicación nativa.
+* Icono propio.
+* Identificador de paquete.
+* Versión definida.
+* Firma de código cuando esté disponible.
+* Verificación de integridad.
+* Estructura correcta de aplicación macOS.
+* Instalación sencilla.
+
+Investiga los requisitos de firma, Gatekeeper y notarización.
+
+Si dispongo de una identidad de desarrollador válida, utiliza el procedimiento oficial correspondiente.
+
+Si no dispongo de ella, genera una compilación local instalable y explica claramente las restricciones de seguridad que puedan aparecer.
+
+No desactives Gatekeeper ni recomiendes modificar globalmente las protecciones de macOS.
+
+Cuando termines, indica la ruta exacta del archivo DMG generado.
+
+Si el entorno de Codex no permite generar el instalador, identifica la limitación concreta y entrega el proyecto compilable junto con el procedimiento mínimo necesario.
+
+⸻
+
+13. VERIFICACIÓN FINAL OBLIGATORIA
+
+Antes de entregar la aplicación:
+
+* Comprueba que compila correctamente.
+* Verifica que abre sin errores.
+* Comprueba que los módulos funcionan.
+* Verifica que los escaneos pueden cancelarse.
+* Comprueba que la interfaz no se bloquea.
+* Verifica que los resultados provienen de datos reales.
+* Comprueba las protecciones contra eliminación accidental.
+* Verifica el comportamiento ante permisos denegados.
+* Comprueba que no se eliminan archivos protegidos.
+* Verifica que las operaciones generan registros.
+* Comprueba que el instalador contiene la aplicación correcta.
+* Documenta cualquier funcionalidad que no haya podido verificarse.
+
+No afirmes haber ejecutado pruebas que realmente no hayas realizado.
+
+No declares que el proyecto está completo mientras existan módulos simulados o funcionalidades principales sin implementar.
+
+⸻
+
+14. DOCUMENTACIÓN DEL PROYECTO
+
+Crea dentro del proyecto:
+
+README.md
+
+Con:
+
+* Descripción.
+* Requisitos.
+* Instalación.
+* Funcionalidades.
+* Permisos.
+* Instrucciones de uso.
+* Limitaciones conocidas.
+
+ARCHITECTURE.md
+
+Con la arquitectura técnica.
+
+SECURITY.md
+
+Con las medidas de seguridad y restricciones.
+
+CHANGELOG.md
+
+Con el historial de desarrollo.
+
+TESTING.md
+
+Con las pruebas realizadas y sus resultados.
+
+ROADMAP.md
+
+Con funcionalidades pendientes y futuras mejoras.
+
+Mantén estos archivos actualizados durante el desarrollo.
+
+⸻
+
+15. INSTRUCCIONES FINALES
+
+Quiero una aplicación que realmente me ayude a administrar mi MacBook Pro M2, especialmente porque dispongo de un almacenamiento interno limitado.
+
+La prioridad será:
+
+Seguridad > Fiabilidad > Funcionalidad > Rendimiento > Diseño visual.
+
+No quiero optimizaciones falsas, promesas de acelerar mágicamente macOS ni eliminaciones agresivas que puedan perjudicar mi equipo.
+
+Quiero una herramienta profesional que me permita comprender qué consume mi almacenamiento, identificar archivos innecesarios, administrar aplicaciones, revisar procesos y controlar los elementos de inicio.
+
+La aplicación debe ser tan intuitiva que pueda utilizarla diariamente sin conocimientos avanzados del sistema.
+
+Toma decisiones técnicas fundamentadas.
+
+Investiga antes de implementar funcionalidades delicadas.
+
+Prioriza la documentación oficial de Apple.
+
+Escribe código limpio, modular, eficiente y mantenible.
+
+No entregues únicamente explicaciones o fragmentos de código.
+
+Quiero que construyas el proyecto completo, lo pruebes y me entregues un archivo instalable para mi Mac.
+
+COMIENZA AHORA
+
+Primero inspecciona mi entorno de desarrollo y confirma:
+
+1. Versión de macOS.
+2. Arquitectura del procesador.
+3. Disponibilidad de Xcode.
+4. Disponibilidad de Swift.
+5. Herramientas de compilación.
+6. Espacio disponible.
+7. Permisos y limitaciones del entorno.
+
+Después investiga las soluciones existentes, establece la arquitectura y comienza inmediatamente el desarrollo.
+
+Trabaja hasta completar la aplicación o encontrar una limitación real que requiera mi intervención.
+
+No te detengas después de crear la estructura inicial.
+
+El objetivo final es MacGuardian.dmg: una aplicación real, segura, funcional, elegante y optimizada para mi MacBook Pro M2.

@@ -1,0 +1,21 @@
+# Herramientas y cachés locales
+.build/
+.build-native/
+.swiftpm/
+.qa/
+.DS_Store
+
+# Aplicaciones e instaladores: se publican en GitHub Releases
+dist/
+*.dSYM/
+
+# Credenciales y ajustes privados
+.env
+.env.*
+*.p12
+*.p8
+*.mobileprovision
+*.xcuserstate
+
+# Registros locales: no se publican en el repositorio ni en el archivo del proyecto
+Docs/verification/*.log

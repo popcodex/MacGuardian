@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleExecutable</key><string>MacGuardian</string>
+<key>CFBundleIdentifier</key><string>local.macguardian.app</string>
+<key>CFBundleDevelopmentRegion</key><string>es</string>
+<key>CFBundleLocalizations</key><array><string>es</string></array>
+<key>CFBundleName</key><string>MacGuardian</string>
+<key>CFBundleDisplayName</key><string>MacGuardian</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleShortVersionString</key><string>0.1.0</string>
+<key>CFBundleVersion</key><string>1</string>
+<key>CFBundleIconFile</key><string>MacGuardian</string>
+<key>LSMinimumSystemVersion</key><string>14.0</string>
+<key>NSHighResolutionCapable</key><true/>
+<key>NSPrincipalClass</key><string>NSApplication</string>
+<key>NSHumanReadableCopyright</key><string>© 2026 MacGuardian. Uso personal.</string>
+<key>NSDownloadsFolderUsageDescription</key><string>Analizar los archivos de Descargas únicamente cuando selecciones esa carpeta.</string>
+<key>NSDocumentsFolderUsageDescription</key><string>Analizar los documentos de la carpeta que selecciones.</string>
+<key>NSDesktopFolderUsageDescription</key><string>Analizar el Escritorio únicamente cuando selecciones esa carpeta.</string>
+<key>NSRemovableVolumesUsageDescription</key><string>Analizar una unidad externa seleccionada por ti.</string>
+</dict></plist>

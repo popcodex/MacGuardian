@@ -1,0 +1,26 @@
+MacGuardian 0.1.0 · Edición personal para Apple Silicon
+
+1. Arrastra MacGuardian.app al enlace Aplicaciones.
+2. Expulsa este disco y abre MacGuardian desde Aplicaciones.
+3. Selecciona una carpeta para un análisis de solo lectura.
+4. Revisa cada selección antes de autorizar moverla a Papelera.
+
+La compilación local tiene firma ad hoc. No está notarizada por Apple.
+Si macOS impide abrirla, revisa Ajustes del Sistema > Privacidad y seguridad
+para autorizar únicamente esta aplicación si confías en su procedencia.
+No desactives Gatekeeper. Una política administrada podría impedir abrirla.
+
+Nunca se vacía la Papelera. Mover archivos allí no libera espacio inmediatamente.
+Los bloques APFS pueden compartirse; el tamaño lógico no es espacio recuperable.
+Para restaurar: Finder > Papelera > seleccionar el elemento > Sacar de la papelera.
+
+Esta primera versión funcional no cubre todavía todo el prompt maestro:
+- No hay desinstalación profunda automática ni detector fiable de restos.
+- Login Items de terceros se administran en Ajustes; la lista de plist es parcial.
+- No modifica Docker, simuladores, entornos virtuales ni dependencias.
+- No mide ciclos/salud de batería, energía por proceso ni temperaturas.
+- Disco y red se consultan mediante Monitor de Actividad.
+- No examina iCloud, .git, paquetes ni rutas excluidas; máximo 250 000 entradas.
+- No garantiza compatibilidad con versiones de macOS no probadas.
+
+Consulta README.md, SECURITY.md, TESTING.md y ROADMAP.md en el proyecto.
